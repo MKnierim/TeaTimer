@@ -2,7 +2,7 @@ QWidget {
 	background-color: #F5FFCE;
 	margin: 0px;
 	padding: 0px;
-	font-family: "Helvetica Neue";
+	font-family: Caviar Dreams;
 	font-weight: 100;
 }
 
@@ -22,24 +22,36 @@ QLabel#infoLabel {
 
 QPushButton {
 	background-color: #617610;
-	color: #FFFFFF;
+	color: #F5FFCE;
 	border-style: none;
+}
+
+QPushButton#banchaButton, QPushButton#senchaButton {
 	height: 140px;
 	font-size: 36pt;
 }
 
 QPushButton:hover {
-	color: #F5FFCE;
+	background-color: #49590C;
 }
 
 QPushButton:pressed {
-	background-color: #FFFFFF;
+	background-color: #384509;
+	color: #FFFFFF;
 }
 
 QPushButton#banchaButton {
-	margin-right: 3px;
+	margin-right: 2px;
 }
 
 QPushButton#senchaButton {
-	margin-left: 3px;
+	margin-left: 2px;
+}
+
+QPushButton#exitButton {
+	background-color: #F5FFCE;
+	color: #617610;
+	font-size: 16pt;
+	padding-right: 4px;
+	padding-top: 4px;
 }
