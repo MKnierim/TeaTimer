@@ -5,42 +5,43 @@ class Form(QWidget):
 	def __init__(self, parent=None):
 		super().__init__()
 
-		self.initUI()
+		self.init_UI()
 
-	def initUI(self):
-		timerLabel = QLabel("00:00")		# Might have to change data type here
-		timerLabel.setObjectName("timerLabel")
+	def init_UI(self):
+		self.timerLabel = QLabel("00:00")		# Might have to change data type here
+		self.timerLabel.setObjectName("timerLabel")
 
-		infoLabel = QLabel("No tea selected")
-		infoLabel.setObjectName("infoLabel")
+		self.infoLabel = QLabel("No tea selected")
+		self.infoLabel.setObjectName("infoLabel")
 
-		banchaButton = QPushButton("Premium\nBancha")
-		banchaButton.setObjectName("banchaButton")
-		banchaButton.clicked.connect(self.infusion)		# Event Handler
+		self.banchaButton = QPushButton("Premium\nBancha")
+		self.banchaButton.setObjectName("banchaButton")
+		self.banchaButton.clicked.connect(self.infusion)		# Event Handler
 
-		senchaButton = QPushButton("Premium\nSencha")
-		senchaButton.setObjectName("senchaButton")
-		senchaButton.clicked.connect(self.infusion)		# Event Handler
+		self.senchaButton = QPushButton("Premium\nSencha")
+		self.senchaButton.setObjectName("senchaButton")
+		self.senchaButton.clicked.connect(self.infusion)		# Event Handler
 
-		resetButton = QPushButton("Reset")
-		resetButton.setObjectName("resetButton")
-		resetButton.clicked.connect(self.abort_infusion)		# Event Handler
-		resetButton.hide()
+		self.resetButton = QPushButton("Reset")
+		self.resetButton.setObjectName("resetButton")
+		self.resetButton.hide()
+		self.resetButton.clicked.connect(self.abort_infusion)		# Event Handler
 
-		exitButton = QPushButton("X")
-		exitButton.setObjectName("exitButton")
-		exitButton.clicked.connect(QCoreApplication.instance().quit)
+		self.exitButton = QPushButton("X")
+		self.exitButton.setObjectName("exitButton")
+		self.exitButton.clicked.connect(QCoreApplication.instance().quit)
+
 
 		grid = QGridLayout()
 		self.setLayout(grid)		# Set the QGridLayout as the window's main layout
 		grid.setSpacing(0)		# Spacing between widgets - does not work if window is resized
 		grid.setContentsMargins(4, 4, 4, 4)
-		grid.addWidget(exitButton, 0, 0, 1, 2, Qt.AlignRight)
-		grid.addWidget(timerLabel, 1, 0, 1, 2, Qt.AlignHCenter)		# http://doc.qt.io/qt-5/qgridlayout.html#addWidget
-		grid.addWidget(infoLabel, 2, 0, 1, 2, Qt.AlignHCenter)
-		grid.addWidget(banchaButton, 3, 0)
-		grid.addWidget(senchaButton, 3, 1)
-		grid.addWidget(resetButton, 3, 0, 1, 2)
+		grid.addWidget(self.exitButton, 0, 0, 1, 2, Qt.AlignRight)
+		grid.addWidget(self.timerLabel, 1, 0, 1, 2, Qt.AlignHCenter)		# http://doc.qt.io/qt-5/qgridlayout.html#addWidget
+		grid.addWidget(self.infoLabel, 2, 0, 1, 2, Qt.AlignHCenter)
+		grid.addWidget(self.banchaButton, 3, 0)
+		grid.addWidget(self.senchaButton, 3, 1)
+		grid.addWidget(self.resetButton, 3, 0, 1, 2)
 
 		self.setStyleSheet(open("style.qss", "r").read())		# self.setStyleSheet("* {color: red}")
 		self.resize(690, 435)
@@ -50,12 +51,15 @@ class Form(QWidget):
 		# self.setWindowTitle("TeaTimer Premium")
 
 	def infusion(self):
-		QMessageBox.information(self, "Yeah!", "Let's brew some tea!")
+		sender = self.sender()
+		QMessageBox.information(self, "Yeah!", "Let's brew some %s!" % sender.text())
 
-		# Manage button display
-		# self.banchaButton.hide()
-		# self.senchaButton.hide()
-		# self.resetButton.show()
+		self.banchaButton.hide()
+		self.senchaButton.hide()
+		self.resetButton.show()
 
 	def abort_infusion(self):
-		QMessageBox.information(self, "No!", "Stop this infusion madness!")
+		# QMessageBox.information(self, "No!", "Stop this infusion madness!")
+		self.banchaButton.show()
+		self.senchaButton.show()
+		self.resetButton.hide()
