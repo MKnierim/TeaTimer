@@ -19,6 +19,9 @@ Here are some useful tips to help run the app:
 
 ## To Do
 
-### Interface
+### GUI
 * Make Window moveable again after removing window frame
-* Add close & minimize button on top
+* Add minimize button on top
+
+### Functionality
+* Figure out how to make buttons clickable multiple times before starting the timer (adjusting infusion cycle with repeated clicks)

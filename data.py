@@ -10,13 +10,12 @@ class Tea(object):
 		self.kind = kind
 		self.infusion_times = infusion_times
 
-P_SENCHA = Tea("Premium Sencha", (180,30,300))		# temporary infusion durations
-P_BANCHA = Tea("Premium Bancha", (120,180,240))		# temporary infusion durations
+TEAONE = Tea("Premium Sencha", (180,60,300))		# temporary infusion durations
+TEATWO = Tea("Premium Bancha", (120,180,240))		# temporary infusion durations
 
 # def function_for_tea(tea):
 # 	tea.tea_kind
 # 	tea.infusion_times
-# 	pass
 
 ## Template rules used:
 ##	- compound: 2 fields

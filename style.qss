@@ -26,7 +26,7 @@ QPushButton {
 	border-style: none;
 }
 
-QPushButton#banchaButton, QPushButton#senchaButton, QPushButton#resetButton {
+QPushButton#teaOneButton, QPushButton#teaTwoButton, QPushButton#resetButton {
 	height: 140px;
 	font-size: 36pt;
 }
@@ -40,11 +40,11 @@ QPushButton:pressed {
 	color: #FFFFFF;
 }
 
-QPushButton#banchaButton {
+QPushButton#teaOneButton {
 	margin-right: 2px;
 }
 
-QPushButton#senchaButton {
+QPushButton#teaTwoButton {
 	margin-left: 2px;
 }
 
