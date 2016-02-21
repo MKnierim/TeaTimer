@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import *
 
 class Form(QWidget):
 	infusionCycle = 0		# Static variable to keep track of current infusion cycle
+	timerValue = 0			# Static variable to keep track of remaining seconds in timer
 
 	def __init__(self, parent=None):
 		super().__init__()
@@ -43,6 +44,9 @@ class Form(QWidget):
 		self.exitButton = QPushButton("x")
 		self.exitButton.setObjectName("exitButton")
 		self.exitButton.clicked.connect(QCoreApplication.instance().quit)
+
+		self.timer = QTimer(self)		# Add Timer Object
+		self.timer.timeout.connect(self.countdown)
 
 		# Arrange UI elements in a layout
 		grid = QGridLayout()
@@ -83,10 +87,13 @@ class Form(QWidget):
 		self.resetButton.show()
 
 		# Start the infusion process (i.e. the countdown)
-		self.countdown(3)
+		self.timerValue = 90
+		self.countdown()
+		self.timer.start(1000)
 
 	def reset(self):
 		self.infusionCycle = 0
+		self.timer.stop()
 
 		self.timerLabel.setText("00:00")
 		self.infoLabel.setText("No tea selected")
@@ -99,21 +106,21 @@ class Form(QWidget):
 		if self.infusionCycle < 3:
 			self.infusionCycle += 1
 
-	def countdown(self, totalSeconds):
-		while totalSeconds > 0:
-			minutes = totalSeconds // 60
-			seconds = totalSeconds % 60
+	def countdown(self):
+		if self.timerValue != 0:
 
-			# Use python string formatting to format in leading zeros
+			minutes = self.timerValue // 60
+			seconds = self.timerValue % 60
+
+		 	# Use python string formatting to format in leading zeros
 			output_string = "{0:02}:{1:02}".format(minutes, seconds)
+
 			self.timerLabel.setText(output_string)
-			print(output_string)
-
-			time.sleep(1)
-			totalSeconds -= 1
-
-		QCoreApplication.instance().quit()		# For development purposes only
-		# self.reset()
+			self.timerValue -= 1
+		else:
+			# self.timer.stop()
+			# QCoreApplication.instance().quit()		# For development purposes only
+			self.reset()
 
 
 ## ===========================
