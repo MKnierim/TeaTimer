@@ -4,10 +4,12 @@
 ## A simple tea timer for the brewery of excellent tea
 __author__ = "Michael Knierim"
 
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
 import time
 import data
+
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+
 
 class Form(QWidget):
 	infusionCycle = 0		# Static variable to keep track of current infusion cycle
@@ -25,20 +27,20 @@ class Form(QWidget):
 		self.infoLabel = QLabel("No tea selected")
 		self.infoLabel.setObjectName("infoLabel")
 
-		self.teaOneButton = QPushButton("Premium\nBancha")
+		self.teaOneButton = QPushButton(data.TEAONE.kind)
 		self.teaOneButton.setObjectName("teaOneButton")
 		self.teaOneButton.clicked.connect(self.infusion)		# Event Handler
 
-		self.teaTwoButton = QPushButton("Premium\nSencha")
+		self.teaTwoButton = QPushButton(data.TEATWO.kind)
 		self.teaTwoButton.setObjectName("teaTwoButton")
 		self.teaTwoButton.clicked.connect(self.infusion)		# Event Handler
 
 		self.resetButton = QPushButton("Reset")
 		self.resetButton.setObjectName("resetButton")
 		self.resetButton.hide()
-		self.resetButton.clicked.connect(self.abort_infusion)		# Event Handler
+		self.resetButton.clicked.connect(self.reset)		# Event Handler
 
-		self.exitButton = QPushButton("X")
+		self.exitButton = QPushButton("x")
 		self.exitButton.setObjectName("exitButton")
 		self.exitButton.clicked.connect(QCoreApplication.instance().quit)
 
@@ -80,10 +82,15 @@ class Form(QWidget):
 		self.teaTwoButton.hide()
 		self.resetButton.show()
 
-	def abort_infusion(self):
+		# Start the infusion process (i.e. the countdown)
+		self.countdown(3)
+
+	def reset(self):
 		self.infusionCycle = 0
 
+		self.timerLabel.setText("00:00")
 		self.infoLabel.setText("No tea selected")
+
 		self.teaOneButton.show()
 		self.teaTwoButton.show()
 		self.resetButton.hide()
@@ -91,6 +98,22 @@ class Form(QWidget):
 	def increase_infusion_cycle(self):
 		if self.infusionCycle < 3:
 			self.infusionCycle += 1
+
+	def countdown(self, totalSeconds):
+		while totalSeconds > 0:
+			minutes = totalSeconds // 60
+			seconds = totalSeconds % 60
+
+			# Use python string formatting to format in leading zeros
+			output_string = "{0:02}:{1:02}".format(minutes, seconds)
+			self.timerLabel.setText(output_string)
+			print(output_string)
+
+			time.sleep(1)
+			totalSeconds -= 1
+
+		QCoreApplication.instance().quit()		# For development purposes only
+		# self.reset()
 
 
 ## ===========================

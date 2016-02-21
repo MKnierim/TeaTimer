@@ -31,6 +31,15 @@ QPushButton#teaOneButton, QPushButton#teaTwoButton, QPushButton#resetButton {
 	font-size: 36pt;
 }
 
+QPushButton#exitButton {
+	background-color: #F5FFCE;
+	color: #617610;
+	font-size: 18pt;
+	font-weight: bold;
+	padding-right: 6px;
+	padding-top: 0px;
+}
+
 QPushButton:hover {
 	background-color: #49590C;
 }
@@ -46,12 +55,4 @@ QPushButton#teaOneButton {
 
 QPushButton#teaTwoButton {
 	margin-left: 2px;
-}
-
-QPushButton#exitButton {
-	background-color: #F5FFCE;
-	color: #617610;
-	font-size: 16pt;
-	padding-right: 4px;
-	padding-top: 4px;
 }

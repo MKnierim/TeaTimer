@@ -10,8 +10,8 @@ class Tea(object):
 		self.kind = kind
 		self.infusion_times = infusion_times
 
-TEAONE = Tea("Premium Sencha", (180,60,300))		# temporary infusion durations
-TEATWO = Tea("Premium Bancha", (120,180,240))		# temporary infusion durations
+TEAONE = Tea("Premium\nSencha", (180,60,300))		# temporary infusion durations
+TEATWO = Tea("Premium\nBancha", (120,180,240))		# temporary infusion durations
 
 # def function_for_tea(tea):
 # 	tea.tea_kind

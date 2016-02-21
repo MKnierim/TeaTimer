@@ -25,3 +25,7 @@ Here are some useful tips to help run the app:
 
 ### Functionality
 * Figure out how to make buttons clickable multiple times before starting the timer (adjusting infusion cycle with repeated clicks)
+* Same problem with adjusting the countdown display - probably needs to be separated from current event handlers
+
+### Data
+* Integrate infusion times from data.py into countdown function
