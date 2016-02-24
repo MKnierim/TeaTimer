@@ -11,6 +11,15 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 
+class QTeaButton(QPushButton):
+
+	def __init__(self, text, parent=None):
+		super().__init__(text, parent)
+
+		# print(QPushButton.__doc__)
+		# print()
+
+
 class Form(QWidget):
 
 	def __init__(self, parent=None):
@@ -32,20 +41,20 @@ class Form(QWidget):
 		self.infoLabel = QLabel("No tea selected")
 		self.infoLabel.setObjectName("infoLabel")
 
-		self.teaOneButton = QPushButton(data.TEAONE.kind)
+		self.teaOneButton = QTeaButton(data.TEAONE.kind)
 		self.teaOneButton.setObjectName("teaOneButton")
 		self.teaOneButton.clicked.connect(self.prepare_infusion)		# Event Handler
 
-		self.teaTwoButton = QPushButton(data.TEATWO.kind)
+		self.teaTwoButton = QTeaButton(data.TEATWO.kind)
 		self.teaTwoButton.setObjectName("teaTwoButton")
 		self.teaTwoButton.clicked.connect(self.prepare_infusion)		# Event Handler
 
-		self.resetButton = QPushButton("Reset")
+		self.resetButton = QTeaButton("Reset")
 		self.resetButton.setObjectName("resetButton")
 		self.resetButton.hide()
 		self.resetButton.clicked.connect(self.reset)		# Event Handler
 
-		self.exitButton = QPushButton("x")
+		self.exitButton = QTeaButton("x")
 		self.exitButton.setObjectName("exitButton")
 		self.exitButton.clicked.connect(QCoreApplication.instance().quit)
 
@@ -111,8 +120,7 @@ class Form(QWidget):
 		if self.infusionCycle < 3:
 			self.infusionCycle += 1
 
-		# Usability feature
-		#	Reset the infusion cycle back to one if the button is clicked a fourth time
+		#	Reset the infusion cycle if the button is clicked a fourth time
 		else:
 			self.infusionCycle = 1
 
@@ -129,9 +137,8 @@ class Form(QWidget):
 			self.timerLabel.setText(output_string)
 			self.cTimerValue -= 1
 		else:
-			# self.timer.stop()
-			# QCoreApplication.instance().quit()		# For development purposes only
 			self.reset()
+			# QCoreApplication.instance().quit()		# For development purposes only
 
 
 ## ===========================

@@ -29,6 +29,7 @@ Here are some useful tips to help run the app:
 
 ### Data
 * Integrate infusion times from data.py into countdown function - Could possibly be done by storing the button object in the data class?
+    - Other way might be to extend the QPushButton class to store the Tea object. This way upon instantiation the Tea object is directly linked to the button
 
 ### Style
 * Change background and font color of main window continously as infusion is getting closer to stop.
