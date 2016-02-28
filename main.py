@@ -11,15 +11,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 
-class QTeaButton(QPushButton):
-
-	def __init__(self, text, parent=None):
-		super().__init__(text, parent)
-
-		# print(QPushButton.__doc__)
-		# print()
-
-
 class Form(QWidget):
 
 	def __init__(self, parent=None):
@@ -41,20 +32,20 @@ class Form(QWidget):
 		self.infoLabel = QLabel("No tea selected")
 		self.infoLabel.setObjectName("infoLabel")
 
-		self.teaOneButton = QTeaButton(data.TEAONE.kind)
+		self.teaOneButton = QPushButton(data.TEAONE.kind)
 		self.teaOneButton.setObjectName("teaOneButton")
 		self.teaOneButton.clicked.connect(self.prepare_infusion)		# Event Handler
 
-		self.teaTwoButton = QTeaButton(data.TEATWO.kind)
+		self.teaTwoButton = QPushButton(data.TEATWO.kind)
 		self.teaTwoButton.setObjectName("teaTwoButton")
 		self.teaTwoButton.clicked.connect(self.prepare_infusion)		# Event Handler
 
-		self.resetButton = QTeaButton("Reset")
+		self.resetButton = QPushButton("Reset")
 		self.resetButton.setObjectName("resetButton")
 		self.resetButton.hide()
 		self.resetButton.clicked.connect(self.reset)		# Event Handler
 
-		self.exitButton = QTeaButton("x")
+		self.exitButton = QPushButton("x")
 		self.exitButton.setObjectName("exitButton")
 		self.exitButton.clicked.connect(QCoreApplication.instance().quit)
 
@@ -64,6 +55,12 @@ class Form(QWidget):
 		self.sTimer = QTimer(self)		# Add single-shot timer for infusion cycle collection (preparation of infusion)
 		self.sTimer.setSingleShot(True)
 		self.sTimer.timeout.connect(self.infusion)
+
+		# Mapping buttons to tea data
+		self.teaButtons = {
+			self.teaOneButton : data.TEAONE,
+			self.teaTwoButton : data.TEATWO
+		}
 
 		# Arrange UI elements in a layout
 		grid = QGridLayout()
@@ -84,11 +81,12 @@ class Form(QWidget):
 	def prepare_infusion(self):
 		self.currentTea = self.sender()
 
-		self.sTimer.start(1000)		# !!! Shorter interval check because clicks might happen fast
+		self.sTimer.start(1000)
 
 		self.increase_infusion_cycle()
+		self.cTimerValue = self.teaButtons[self.currentTea].infusion_times[self.infusionCycle-1]
 
-		self.timerLabel.setText("--:--")
+		self.timerLabel.setText(self.display_time())
 		displayText = self.currentTea.text().replace("\n", " ") + " - Cycle " + str(self.infusionCycle)
 		self.infoLabel.setText(displayText)
 
@@ -99,7 +97,6 @@ class Form(QWidget):
 		self.resetButton.show()
 
 		# Start the infusion process (i.e. the countdown)
-		self.cTimerValue = 90
 		self.countdown()
 		self.cTimer.start(1000)
 
@@ -125,14 +122,19 @@ class Form(QWidget):
 			self.infusionCycle = 1
 
 
+	def display_time(self):
+		minutes = self.cTimerValue // 60
+		seconds = self.cTimerValue % 60
+
+		# Use python string formatting to format in leading zeros
+		output_string = "{0:02}:{1:02}".format(minutes, seconds)
+		return output_string
+
+
 	def countdown(self):
 		if self.cTimerValue != 0:
 
-			minutes = self.cTimerValue // 60
-			seconds = self.cTimerValue % 60
-
-		 	# Use python string formatting to format in leading zeros
-			output_string = "{0:02}:{1:02}".format(minutes, seconds)
+			output_string = self.display_time()
 
 			self.timerLabel.setText(output_string)
 			self.cTimerValue -= 1
