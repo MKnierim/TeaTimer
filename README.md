@@ -3,7 +3,7 @@
 
 ### Running instructions
 
-Here are some useful tips to help run the app:
+Here are some useful tips to help run the application:
 
 #### Desktop
 
@@ -20,15 +20,17 @@ Here are some useful tips to help run the app:
 ## To Do
 
 ### GUI
-* Make Window moveable again after removing window frame
+* Make Window movable again after removing window frame
 * Add minimize button on top
 
 ### Functionality
-* Make sure that clicking a different button resets the cycle count (don't increase if a different tea is chosen) - Maybe I could integrate the cycle state into the Tea object (in data.py) later...
+* None
 
 ### Data
-* Integrate infusion times from data.py into countdown function - Could possibly be done by storing the button object in the data class?
-    - Other way might be to extend the QPushButton class to store the Tea object. This way upon instantiation the Tea object is directly linked to the button
+* None
 
 ### Style
-* Change background and font color of main window continously as infusion is getting closer to stop.
+* Change background and font color of main window continuously as infusion is getting closer to stop.
+
+### Deployment
+* Figure out how to pack & deploy so that people can use it without having to install PyQt

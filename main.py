@@ -79,10 +79,9 @@ class Form(QWidget):
 
 
 	def prepare_infusion(self):
-		self.currentTea = self.sender()
+		self.sTimer.start(1250)
 
-		self.sTimer.start(1000)
-
+		self.tea_change(self.sender())		# Check if a new type of tea is to be brewed
 		self.increase_infusion_cycle()
 		self.cTimerValue = self.teaButtons[self.currentTea].infusion_times[self.infusionCycle-1]
 
@@ -111,6 +110,12 @@ class Form(QWidget):
 		self.teaOneButton.show()
 		self.teaTwoButton.show()
 		self.resetButton.hide()
+
+
+	def tea_change(self, sender):
+		if not sender == self.currentTea:
+			self.currentTea = sender
+			self.infusionCycle = 0
 
 
 	def increase_infusion_cycle(self):
