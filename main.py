@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 ## A simple tea timer for the brewery of excellent tea
@@ -9,7 +9,6 @@ import data
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-
 
 class Form(QWidget):
 
@@ -160,7 +159,9 @@ if __name__ == '__main__':
 	# Next line removes the title bar. For additional information see:
 	# 		http://doc.qt.io/qt-5/qt.html#WindowType-enum
 	#			http://doc.qt.io/qt-5/qtwidgets-widgets-windowflags-example.html
-	screen.setWindowFlags(Qt.CustomizeWindowHint)
+	# screen.setWindowFlags(Qt.CustomizeWindowHint | Qt.WindowTitleHint)
+	screen.setWindowFlags(Qt.FramelessWindowHint)
 	screen.show()
+	screen.raise_()
 
 	sys.exit(app.exec_())		# Event handling loop for the application; The sys.exit() method ensures a clean exit, releasing memory resources
