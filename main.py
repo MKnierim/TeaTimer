@@ -15,10 +15,6 @@ class Form(QWidget):
 	def __init__(self, parent=None):
 		super().__init__()
 
-		self.init_UI()
-
-
-	def init_UI(self):
 		# Process variables - They change with user input decisions
 		self.infusionCycle = 0		# Variable to keep track of current infusion cycle (Integer)
 		self.currentTea = None		# Variable to keep track of current chosen tea (Object)
