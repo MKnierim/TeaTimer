@@ -19,9 +19,6 @@ Here are some useful tips to help run the application:
 
 ## Course of Action
 ### Must-Haves
-* Make Window movable again after removing window frame - paint your own title bar/frame inside the widget (how do I do that?)
-    * See: https://forum.qt.io/topic/26108/customize-window-frame/8
-    * See: http://qt.developpez.com/tutoriels/braindeadbzh/customwindow/
 * Figure out how to pack & deploy so that people can use it without having to install PyQt
     - Currently this seems problematic using PyInstaller (stackoverflow post has been initiated)
     - If this does not get solved, consider switching to cx_Freeze
@@ -36,6 +33,7 @@ Here are some useful tips to help run the application:
 
 ### Nice-to-have
 * Add minimize button on top
+* Consider securing that window can only be moved by clicking the title bar not the whole window
 * Refactor code (simply with the goal of improving code quality)
 
 ### Core Changes

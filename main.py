@@ -1,14 +1,52 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 ## A simple tea timer for the brewery of excellent tea
 __author__ = "Michael Knierim"
+
+## ===========================
+## IMPORTS
 
 import time
 import data
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+
+
+## ===========================
+## CONSTANTS
+
+WINDOW_WIDTH = 690
+WINDOW_HEIGHT = 435
+
+
+
+# class WindowTitleBar(QWidget):
+# 	def __init__(self, parent=None):
+# 		super().__init__()
+
+# 		self.setFixedHeight(32)				# This is supposed to set the container height for the title bar
+
+# 		self.barTitle = QLabel(self)
+# 		self.barTitle.setStyleSheet("color: white; font-family: Sans; font-weight: bold; font-size: 14px")
+
+# 		self.windowPos = QPoint()		# Stores data relevant to the movement/deplacement of the window
+
+# 	# Overload mouseEvent handlers to make window moveable
+# 	def mousePressEvent(self, QMouseEvent):
+# 		self.windowPos = QMouseEvent.pos()
+# 		self.setCursor(QCursor(Qt.SizeAllCursor))
+
+# 	def mouseReleaseEvent(self, QMouseEvent):
+# 		self.setCursor(QCursor(Qt.ArrowCursor))
+
+# 	def mouseMoveEvent(self, QMouseEvent):
+# 		pos = QPoint(QMouseEvent.globalPos())
+# 		self.window().move(pos - self.windowPos)			# Why does self.window() return the Form object here? Why does this not happen in updateWindowTitle?
+
+
 
 class Form(QWidget):
 
@@ -19,6 +57,10 @@ class Form(QWidget):
 		self.infusionCycle = 0		# Variable to keep track of current infusion cycle (Integer)
 		self.currentTea = None		# Variable to keep track of current chosen tea (Object)
 		self.cTimerValue = 0			# Variable to keep track of remaining seconds in timer (Integer)
+
+		# # Instantiate custom window title bar
+		# self.titleBar = WindowTitleBar()
+		# self.titleBar.setStyleSheet("background-color: #334455")
 
 		# Declare and specify UI elements
 		self.timerLabel = QLabel("00:00")		# Might have to change data type here
@@ -62,6 +104,7 @@ class Form(QWidget):
 		self.setLayout(grid)		# Set the QGridLayout as the window's main layout
 		grid.setSpacing(0)		# Spacing between widgets - does not work if window is resized
 		grid.setContentsMargins(4, 4, 4, 4)
+		# grid.addWidget(self.titleBar, 0, 0, 1, 2)			# Put title bar in layout on top
 		grid.addWidget(self.exitButton, 0, 0, 1, 2, Qt.AlignRight)
 		grid.addWidget(self.timerLabel, 1, 0, 1, 2, Qt.AlignHCenter)		# http://doc.qt.io/qt-5/qgridlayout.html#addWidget
 		grid.addWidget(self.infoLabel, 2, 0, 1, 2, Qt.AlignHCenter)
@@ -70,7 +113,20 @@ class Form(QWidget):
 		grid.addWidget(self.resetButton, 3, 0, 1, 2)
 
 		self.setStyleSheet(open("style.qss", "r").read())		# self.setStyleSheet("* {color: red}")
-		self.resize(690, 435)
+		self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
+
+
+	# Overload mouseEvent handlers to make window moveable
+	def mousePressEvent(self, QMouseEvent):
+		self.windowPos = QMouseEvent.pos()
+		self.setCursor(QCursor(Qt.SizeAllCursor))
+
+	def mouseReleaseEvent(self, QMouseEvent):
+		self.setCursor(QCursor(Qt.ArrowCursor))
+
+	def mouseMoveEvent(self, QMouseEvent):
+		pos = QPoint(QMouseEvent.globalPos())
+		self.window().move(pos - self.windowPos)			# Why does self.window() return the Form object here? Why does this not happen in updateWindowTitle?
 
 
 	def prepare_infusion(self):

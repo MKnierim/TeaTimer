@@ -20,7 +20,6 @@ WINDOW_HEIGHT = 435
 
 class WindowTitleBar(QWidget):
 	def __init__(self, parent=None):
-		# print("WindowTitleBar constructor gets called")
 		super().__init__()
 
 		self.setFixedHeight(32)				# This is supposed to set the container height for the title bar
@@ -104,8 +103,6 @@ class Form(QWidget):
 		self.titleBar = WindowTitleBar()						#	Instantiate
 
 		self.windowTitleChanged.connect(self.titleBar.updateWindowTitle)
-		# QObject.connect(self, SIGNAL(WindowTitleChanged()),
-		#									WindowTitleBar, SLOT(UpdateWindowTitle()))		# In PyQt4, QObject.connect() is no longer implemented
 
 		self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
 		self.setWindowTitle("Tutorial Qt: CustomWindow")
