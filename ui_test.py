@@ -28,6 +28,8 @@ class WindowTitleBar(QWidget):
 		self.barTitle = QLabel(self)
 		self.barTitle.setStyleSheet("color: white; font-family: Sans; font-weight: bold; font-size: 14px")
 
+		self.windowPos = QPoint()		# Stores data relevant to the movement/deplacement of the window
+
 
 	# Overloading the resizeEvent method
 	# This is done so that the window is only drawn anew when a resize event occurs (so not the whole time)
@@ -79,6 +81,19 @@ class WindowTitleBar(QWidget):
 	# Slot for keeping title synchronized. Get's called by signal WindowTitleChanged()
 	def updateWindowTitle(self, titleText=""):
 		self.barTitle.setText(titleText)
+
+	# Overload mouseEvent handlers to make window moveable
+	def mousePressEvent(self, QMouseEvent):
+		self.windowPos = QMouseEvent.pos()
+		self.setCursor(QCursor(Qt.SizeAllCursor))
+
+	def mouseReleaseEvent(self, QMouseEvent):
+		self.setCursor(QCursor(Qt.ArrowCursor))
+
+	def mouseMoveEvent(self, QMouseEvent):
+		pos = QPoint(QMouseEvent.globalPos())
+		self.window().move(pos - self.windowPos)			# Why does self.window() return the Form object here? Why does this not happen in updateWindowTitle?
+
 
 
 class Form(QWidget):
