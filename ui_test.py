@@ -4,19 +4,23 @@
 ## A simple tea timer for the brewery of excellent tea
 __author__ = "Michael Knierim"
 
-## ===========================
+## ===============================================================
 ## IMPORTS
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
-## ===========================
+## ===============================================================
 ## CONSTANTS
 
 WINDOW_WIDTH = 690
 WINDOW_HEIGHT = 435
 
+
+
+## ===============================================================
+## CLASSES
 
 class WindowTitleBar(QWidget):
 	def __init__(self, parent=None):
@@ -167,7 +171,7 @@ class Form(QWidget):
 		painter.drawRect(0, 0, self.width(), self.height())
 
 
-## ===========================
+## ===============================================================
 ## MAIN LOOP
 if __name__ == '__main__':
 	import sys

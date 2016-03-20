@@ -1,10 +1,24 @@
 QWidget {
+	font-family: Caviar Dreams, Sans;
+	font-weight: 100;
+}
+
+Form {
 	background-color: #F5FFCE;
 	margin: 0px;
 	padding: 0px;
-	font-family: Caviar Dreams;
-	font-weight: 100;
 }
+
+/* I don't understand why the background of WindowTitleBar won't
+   change color unless the subselector is included.
+   It works for Form, right? Could it be that WindowTitleBar is descendant of Form? */
+WindowTitleBar * {
+	background-color: #F5FF2E;
+	color: white;
+	min-width: 680px;
+	max-width: 680px;
+}
+
 
 QLabel {
 	color: #617610;
