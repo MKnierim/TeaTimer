@@ -1,8 +1,6 @@
 # TeaTimer Application (smarTimer?)
 **Quick Thoughts**
-* I see two options for making the window moveable:
-	1. Figure out how to exclude the areas in which there are QPushButtons from being affected by the Eventhandlers (check if cursor is over Button area)
-	2. Find a way to separate the event handler action from children of Form instance (i.e. not work on PushButtons)
+* ...
 
 
 Features
@@ -27,15 +25,15 @@ Here are some useful tips to help run the application:
 Course of Action
 --------------------------------------------------------------
 **Next steps**
-	* Transfer new functions from testUI to TeaTimer
+	* Finish alignment of minimize button (probably create new grid and place it inside a container title row of the current grid?)
+	* Finish securing that window can only be moved by clicking the title bar not the whole window
+		- I see two options for making the window moveable:
+			1. Figure out how to exclude the areas in which there are QPushButtons from being affected by the Eventhandlers (check if cursor is over Button area)
+			2. Find a way to separate the event handler action from children of Form instance (i.e. not work on PushButtons)
 
 **Key Functionality**
 	- Functionality for user to change tea (not only in data but in front-end)
 	- Functionality to store teas (in order to switch them out easily later)
-
-**Infrastructure**
-	- Add minimize button on top
-	- Secure that window can only be moved by clicking the title bar not the whole window
 
 **Appearance**
 	- Specify things like font, font-size, etc. so that app looks similar on different platforms

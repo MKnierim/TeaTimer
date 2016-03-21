@@ -26,29 +26,6 @@ WINDOW_HEIGHT = 435
 ## ===============================================================
 ## CLASSES
 
-class WindowTitleBar(QWidget):
-	def __init__(self, parent=None):
-		super().__init__()
-
-		self.setFixedHeight(32)				# This is supposed to set the container height for the title bar
-
-		self.barTitle = QLabel(self)
-		# self.barTitle.setObjectName("barTitle")
-
-	# # Overload mouseEvent handlers to make window moveable
-	# def mousePressEvent(self, QMouseEvent):
-	# 	self.windowPos = QMouseEvent.pos()
-	# 	self.setCursor(QCursor(Qt.SizeAllCursor))
-
-	# def mouseReleaseEvent(self, QMouseEvent):
-	# 	self.setCursor(QCursor(Qt.ArrowCursor))
-
-	# def mouseMoveEvent(self, QMouseEvent):
-	# 	pos = QPoint(QMouseEvent.globalPos())
-	# 	self.window().move(pos - self.windowPos)
-
-
-
 class Form(QWidget):
 	def __init__(self, parent=None):
 		super().__init__()
@@ -57,11 +34,6 @@ class Form(QWidget):
 		self.infusionCycle = 0		# Variable to keep track of current infusion cycle (Integer)
 		self.currentTea = None		# Variable to keep track of current chosen tea (Object)
 		self.cTimerValue = 0			# Variable to keep track of remaining seconds in timer (Integer)
-
-		# Instantiate custom window title bar
-		self.titleBar = WindowTitleBar()
-		self.titleBar.setObjectName("titleBar")
-		# self.titleBar.setStyleSheet("background-color: #334455")
 
 		# Declare and specify UI elements
 		self.timerLabel = QLabel("00:00")		# Might have to change data type here
@@ -83,6 +55,10 @@ class Form(QWidget):
 		self.resetButton.hide()
 		self.resetButton.clicked.connect(self.reset)		# Event Handler
 
+		self.minButton = QPushButton("_")
+		self.minButton.setObjectName("minButton")
+		self.minButton.clicked.connect(self.showMinimized)
+
 		self.exitButton = QPushButton("x")
 		self.exitButton.setObjectName("exitButton")
 		self.exitButton.clicked.connect(QCoreApplication.instance().quit)
@@ -100,18 +76,24 @@ class Form(QWidget):
 			self.teaTwoButton : data.TEATWO
 		}
 
+		# Create container layout for title bar buttons
+		barBox = QHBoxLayout()
+		barBox.addWidget(self.minButton)
+		barBox.addSpacing(10)
+		barBox.addWidget(self.exitButton)
+		barBox.addSpacing(6)
+
 		# Arrange UI elements in a layout
 		grid = QGridLayout()
 		self.setLayout(grid)		# Set the QGridLayout as the window's main layout
 		grid.setSpacing(0)		# Spacing between widgets - does not work if window is resized
 		grid.setContentsMargins(4, 4, 4, 4)
-		grid.addWidget(self.titleBar, 0, 0, 1, -1)			# Put title bar in layout on top
-		grid.addWidget(self.exitButton, 1, 0, 1, 2, Qt.AlignRight)
-		grid.addWidget(self.timerLabel, 2, 0, 1, 2, Qt.AlignHCenter)		# http://doc.qt.io/qt-5/qgridlayout.html#addWidget
-		grid.addWidget(self.infoLabel, 3, 0, 1, 2, Qt.AlignHCenter)
-		grid.addWidget(self.teaOneButton, 4, 0)
-		grid.addWidget(self.teaTwoButton, 4, 1)
-		grid.addWidget(self.resetButton, 4, 0, 1, 2)
+		grid.addLayout(barBox, 0, 1, Qt.AlignRight)
+		grid.addWidget(self.timerLabel, 1, 0, 1, -1, Qt.AlignHCenter)		# http://doc.qt.io/qt-5/qgridlayout.html#addWidget
+		grid.addWidget(self.infoLabel, 2, 0, 1, -1, Qt.AlignHCenter)
+		grid.addWidget(self.teaOneButton, 3, 0)
+		grid.addWidget(self.teaTwoButton, 3, 1)
+		grid.addWidget(self.resetButton, 3, 0, 1, 2)
 
 		self.setStyleSheet(open("style.qss", "r").read())
 		self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)

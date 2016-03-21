@@ -9,17 +9,6 @@ Form {
 	padding: 0px;
 }
 
-/* I don't understand why the background of WindowTitleBar won't
-   change color unless the subselector is included.
-   It works for Form, right? Could it be that WindowTitleBar is descendant of Form? */
-WindowTitleBar * {
-	background-color: #F5FF2E;
-	color: white;
-	min-width: 680px;
-	max-width: 680px;
-}
-
-
 QLabel {
 	color: #617610;
 }
@@ -45,13 +34,14 @@ QPushButton#teaOneButton, QPushButton#teaTwoButton, QPushButton#resetButton {
 	font-size: 36pt;
 }
 
-QPushButton#exitButton {
+QPushButton#minButton, QPushButton#exitButton {
 	background-color: #F5FFCE;
 	color: #617610;
 	font-size: 18pt;
 	font-weight: bold;
-	padding-right: 6px;
-	padding-top: 0px;
+	/*margin-right: 6px;*/
+	margin-top: 0px;
+	/*border: 1px solid red;*/
 }
 
 QPushButton:hover {
