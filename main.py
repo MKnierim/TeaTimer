@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 ## A simple tea timer for the brewery of excellent tea
-__author__ = "Michael Knierim"
+__author__ = "Michael T. Knierim"
 
 
 ## ===============================================================
@@ -26,40 +26,53 @@ WINDOW_HEIGHT = 435
 ## ===============================================================
 ## CLASSES
 
+class UnmoveableButton(QPushButton):
+	def __init__(self, text=""):
+		super().__init__(text)
+
+	# This event function is overloaded in order to avoid the widget from delegating the event up to the parent.
+	# This way, the pre-existing functionality is skipped, i.e. the window can no longer be moved while hovering over a button.
+	#
+	# Actually, it might also be, that there is no pre-existing functionality which might be why it didn't help to
+	# set QMouseEvent.ignore()..
+	def mouseMoveEvent(self, QMouseEvent):
+		pass
+
+
 class Form(QWidget):
 	def __init__(self, parent=None):
 		super().__init__()
 
 		# Process variables - They change with user input decisions
-		self.infusionCycle = 0		# Variable to keep track of current infusion cycle (Integer)
-		self.currentTea = None		# Variable to keep track of current chosen tea (Object)
-		self.cTimerValue = 0			# Variable to keep track of remaining seconds in timer (Integer)
+		self.infusionCycle = 0		# Keep track of current infusion cycle (Integer)
+		self.currentTea = None		# Keep track of current chosen tea (Object)
+		self.cTimerValue = 0		# Keep track of remaining seconds in timer (Integer)
 
 		# Declare and specify UI elements
-		self.timerLabel = QLabel("00:00")		# Might have to change data type here
+		self.timerLabel = QLabel("00:00")
 		self.timerLabel.setObjectName("timerLabel")
 
 		self.infoLabel = QLabel("No tea selected")
 		self.infoLabel.setObjectName("infoLabel")
 
-		self.teaOneButton = QPushButton(data.TEAONE.kind)
+		self.teaOneButton = UnmoveableButton(data.TEAONE.name)
 		self.teaOneButton.setObjectName("teaOneButton")
 		self.teaOneButton.clicked.connect(self.prepare_infusion)		# Event Handler
 
-		self.teaTwoButton = QPushButton(data.TEATWO.kind)
+		self.teaTwoButton = UnmoveableButton(data.TEATWO.name)
 		self.teaTwoButton.setObjectName("teaTwoButton")
 		self.teaTwoButton.clicked.connect(self.prepare_infusion)		# Event Handler
 
-		self.resetButton = QPushButton("Reset")
+		self.resetButton = UnmoveableButton("Reset")
 		self.resetButton.setObjectName("resetButton")
 		self.resetButton.hide()
-		self.resetButton.clicked.connect(self.reset)		# Event Handler
+		self.resetButton.clicked.connect(self.reset)					# Event Handler
 
-		self.minButton = QPushButton("_")
+		self.minButton = UnmoveableButton("_")
 		self.minButton.setObjectName("minButton")
 		self.minButton.clicked.connect(self.showMinimized)
 
-		self.exitButton = QPushButton("x")
+		self.exitButton = UnmoveableButton("x")
 		self.exitButton.setObjectName("exitButton")
 		self.exitButton.clicked.connect(QCoreApplication.instance().quit)
 
@@ -98,7 +111,6 @@ class Form(QWidget):
 		self.setStyleSheet(open("style.qss", "r").read())
 		self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
-
 	# Arranging window in center of the screen by overloading showEvent method
 	def showEvent(self, QShowEvent):
 		self.centerOnScreen()
@@ -120,8 +132,10 @@ class Form(QWidget):
 		self.windowPos = QMouseEvent.pos()
 		self.setCursor(QCursor(Qt.SizeAllCursor))
 
+
 	def mouseReleaseEvent(self, QMouseEvent):
 		self.setCursor(QCursor(Qt.ArrowCursor))
+
 
 	def mouseMoveEvent(self, QMouseEvent):
 		pos = QPoint(QMouseEvent.globalPos())
@@ -140,16 +154,22 @@ class Form(QWidget):
 		self.infoLabel.setText(displayText)
 
 
+	# Start the infusion process (i.e. the countdown)
 	def infusion(self):
 		self.teaOneButton.hide()
 		self.teaTwoButton.hide()
 		self.resetButton.show()
 
-		# Start the infusion process (i.e. the countdown)
 		self.countdown()
 		self.cTimer.start(1000)
 
 
+	# Alert the user when the tea is finished
+	def finish(self):
+		self.raise_()		# Bring the window to the foreground
+
+
+	# Reset the timer to it's initial state after a tea has been brewed
 	def reset(self):
 		self.infusionCycle = 0
 		self.cTimer.stop()
@@ -194,11 +214,13 @@ class Form(QWidget):
 			self.timerLabel.setText(output_string)
 			self.cTimerValue -= 1
 		else:
+			self.finish()
 			self.reset()
 
 
 ## ===============================================================
 ## MAIN LOOP
+
 if __name__ == '__main__':
 	import sys
 
@@ -207,14 +229,9 @@ if __name__ == '__main__':
 	screen = Form()
 
 	# Next line removes the title bar. For additional information see:
-	# 		http://doc.qt.io/qt-5/qt.html#WindowType-enum
-	#			http://doc.qt.io/qt-5/qtwidgets-widgets-windowflags-example.html
-	# screen.setWindowFlags(Qt.CustomizeWindowHint | Qt.WindowTitleHint)
+	# http://doc.qt.io/qt-5/qt.html#WindowType-enum
+	# http://doc.qt.io/qt-5/qtwidgets-widgets-windowflags-example.html
 	screen.setWindowFlags(Qt.FramelessWindowHint)
 	screen.show()
-	screen.raise_()
-	print(screen.teaOneButton.pos())
-	print(screen.teaOneButton.frameGeometry())
-	print(screen.teaOneButton.frameSize())
 
 	sys.exit(app.exec_())		# Event handling loop for the application; The sys.exit() method ensures a clean exit, releasing memory resources

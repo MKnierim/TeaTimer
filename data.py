@@ -6,8 +6,8 @@
 ##	- kind is the unique name of the kind of tea
 ##	- infusion_times is a tuple containing times in seconds for first, second and third infusion
 class Tea(object):
-	def __init__(self, kind, infusion_times):
-		self.kind = kind
+	def __init__(self, name, infusion_times):
+		self.name = name
 		self.infusion_times = infusion_times
 
 TEAONE = Tea("Premium\nSencha", (180,60,300))		# temporary infusion durations
