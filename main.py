@@ -30,6 +30,12 @@ class UnmoveableButton(QPushButton):
 	def __init__(self, text=""):
 		super().__init__(text)
 
+		# Add an opacity property to every button instance - makes it animatable later
+		self.fadeEffect = QGraphicsOpacityEffect(self)
+		self.fadeEffect.setOpacity(1.0)
+		self.setGraphicsEffect(self.fadeEffect)
+
+
 	# This event function is overloaded in order to avoid the widget from delegating the event up to the parent.
 	# This way, the pre-existing functionality is skipped, i.e. the window can no longer be moved while hovering over a button.
 	#
@@ -111,6 +117,42 @@ class Form(QWidget):
 		self.setStyleSheet(open("style.qss", "r").read())
 		self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
+
+	def buttonAnimation(self):
+		DURATION = 250
+
+		self.b1Anim = QPropertyAnimation(self.teaOneButton.fadeEffect, b"opacity")
+		self.b1Anim.setDuration(DURATION)
+		self.b1Anim.setStartValue(1.0)
+		self.b1Anim.setEndValue(0)
+
+		self.b2Anim = QPropertyAnimation(self.teaTwoButton.fadeEffect, b"opacity")
+		self.b2Anim.setDuration(DURATION)
+		self.b2Anim.setStartValue(1.0)
+		self.b2Anim.setEndValue(0)
+
+		self.rAnim = QPropertyAnimation(self.resetButton.fadeEffect, b"opacity")
+		self.rAnim.setDuration(DURATION)
+		self.rAnim.setStartValue(0)
+		self.rAnim.setEndValue(1.0)
+
+		self.tBtnAnim = QParallelAnimationGroup()
+		self.tBtnAnim.addAnimation(self.b1Anim)
+		self.tBtnAnim.addAnimation(self.b2Anim)
+
+		self.btnSwitchAnim = QSequentialAnimationGroup()
+		self.btnSwitchAnim.addAnimation(self.tBtnAnim)
+		self.btnSwitchAnim.addAnimation(self.rAnim)
+		self.btnSwitchAnim.finished.connect(self.hideButtons)
+		self.btnSwitchAnim.start(QAbstractAnimation.DeleteWhenStopped)
+
+
+	def hideButtons(self):
+		self.teaOneButton.hide()
+		self.teaTwoButton.hide()
+		self.resetButton.show()
+
+
 	# Arranging window in center of the screen by overloading showEvent method
 	def showEvent(self, QShowEvent):
 		self.centerOnScreen()
@@ -156,9 +198,11 @@ class Form(QWidget):
 
 	# Start the infusion process (i.e. the countdown)
 	def infusion(self):
-		self.teaOneButton.hide()
-		self.teaTwoButton.hide()
-		self.resetButton.show()
+		self.buttonAnimation()
+
+		# self.teaOneButton.hide()
+		# self.teaTwoButton.hide()
+		# self.resetButton.show()
 
 		self.countdown()
 		self.cTimer.start(1000)
@@ -180,6 +224,10 @@ class Form(QWidget):
 		self.teaOneButton.show()
 		self.teaTwoButton.show()
 		self.resetButton.hide()
+
+		self.teaOneButton.fadeEffect.setOpacity(1.0)
+		self.teaTwoButton.fadeEffect.setOpacity(1.0)
+		self.resetButton.fadeEffect.setOpacity(0)
 
 
 	def tea_change(self, sender):

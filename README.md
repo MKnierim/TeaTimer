@@ -24,8 +24,12 @@ Here are some useful tips to help run the application:
 
 Course of Action
 --------------------------------------------------------------
+**Downhill parking**
+	* Fix some details in button fade animations (timing & spaghetti code)
+
 **Next steps**
 	- Make transitions between states smoother (e.g. fade buttons in&out)
+		+ I might also use the same transitions to animate the clock (pulsing) before the countdown starts (here setLoopCount(nr of loops) should help)
 
 
 **Key Functionality**
