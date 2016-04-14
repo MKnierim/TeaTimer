@@ -27,12 +27,12 @@ WINDOW_HEIGHT = 435
 ## CLASSES
 
 class UnmoveableButton(QPushButton):
-	def __init__(self, text=""):
+	def __init__(self, text="", opacity=1.0):
 		super().__init__(text)
 
 		# Add an opacity property to every button instance - makes it animatable later
 		self.fadeEffect = QGraphicsOpacityEffect(self)
-		self.fadeEffect.setOpacity(1.0)
+		self.fadeEffect.setOpacity(opacity)
 		self.setGraphicsEffect(self.fadeEffect)
 
 
@@ -43,6 +43,11 @@ class UnmoveableButton(QPushButton):
 	# set QMouseEvent.ignore()..
 	def mouseMoveEvent(self, QMouseEvent):
 		pass
+
+
+# class TeaButtonStack(QStackedWidget):
+# 	def __init__(self):
+# 		super().__init__()
 
 
 class Form(QWidget):
@@ -69,7 +74,7 @@ class Form(QWidget):
 		self.teaTwoButton.setObjectName("teaTwoButton")
 		self.teaTwoButton.clicked.connect(self.prepare_infusion)		# Event Handler
 
-		self.resetButton = UnmoveableButton("Reset")
+		self.resetButton = UnmoveableButton("Reset", opacity=0)
 		self.resetButton.setObjectName("resetButton")
 		self.resetButton.hide()
 		self.resetButton.clicked.connect(self.reset)					# Event Handler
@@ -95,19 +100,30 @@ class Form(QWidget):
 			self.teaTwoButton : data.TEATWO
 		}
 
-		# Create container layout for title bar buttons
-		barBox = QHBoxLayout()
-		barBox.addWidget(self.minButton)
-		barBox.addSpacing(10)
-		barBox.addWidget(self.exitButton)
-		barBox.addSpacing(6)
+		# Container layout for title bar buttons
+		topBox = QHBoxLayout()
+		topBox.addWidget(self.minButton)
+		topBox.addSpacing(10)
+		topBox.addWidget(self.exitButton)
+		topBox.addSpacing(6)
+
+		# # Container layout for tea buttons on bottom
+		# bottomBox = QHBoxLayout()
+		# bottomBox.addWidget(self.teaOneButton)
+		# topBox.addSpacing(10)
+		# bottomBox.addWidget(self.teaTwoButton)
+
+		# # Create stacked layout for bottom bar buttons
+		# bottomStack = QStackedLayout()
+		# bottomStack.addChildLayout(bottomBox)
+		# bottomStack.addWidget(self.resetButton)
 
 		# Arrange UI elements in a layout
 		grid = QGridLayout()
 		self.setLayout(grid)		# Set the QGridLayout as the window's main layout
 		grid.setSpacing(0)		# Spacing between widgets - does not work if window is resized
 		grid.setContentsMargins(4, 4, 4, 4)
-		grid.addLayout(barBox, 0, 1, Qt.AlignRight)
+		grid.addLayout(topBox, 0, 1, Qt.AlignRight)
 		grid.addWidget(self.timerLabel, 1, 0, 1, -1, Qt.AlignHCenter)		# http://doc.qt.io/qt-5/qgridlayout.html#addWidget
 		grid.addWidget(self.infoLabel, 2, 0, 1, -1, Qt.AlignHCenter)
 		grid.addWidget(self.teaOneButton, 3, 0)
@@ -118,8 +134,40 @@ class Form(QWidget):
 		self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
 
+	# Arranging window in center of the screen by overloading showEvent method
+	def showEvent(self, QShowEvent):
+		screen = QDesktopWidget()
+		screenGeom = QRect(screen.screenGeometry(self))
+
+		screenCenterX = screenGeom.center().x()
+		screenCenterY = screenGeom.center().y()
+
+		self.move(screenCenterX - self.width() / 2,
+							screenCenterY - self.height() / 2)
+
+
+	# Overload mouseEvent handlers to make window moveable
+	def mousePressEvent(self, QMouseEvent):
+		self.windowPos = QMouseEvent.pos()
+		self.setCursor(QCursor(Qt.SizeAllCursor))
+
+
+	# ...
+	def mouseReleaseEvent(self, QMouseEvent):
+		self.setCursor(QCursor(Qt.ArrowCursor))
+
+
+	# ...
+	def mouseMoveEvent(self, QMouseEvent):
+		pos = QPoint(QMouseEvent.globalPos())
+		self.window().move(pos - self.windowPos)
+
+
+	# ...
 	def buttonAnimation(self):
-		DURATION = 250
+		DURATION = 300
+
+		self.resetButton.show()
 
 		self.b1Anim = QPropertyAnimation(self.teaOneButton.fadeEffect, b"opacity")
 		self.b1Anim.setDuration(DURATION)
@@ -139,51 +187,18 @@ class Form(QWidget):
 		self.tBtnAnim = QParallelAnimationGroup()
 		self.tBtnAnim.addAnimation(self.b1Anim)
 		self.tBtnAnim.addAnimation(self.b2Anim)
-
-		self.btnSwitchAnim = QSequentialAnimationGroup()
-		self.btnSwitchAnim.addAnimation(self.tBtnAnim)
-		self.btnSwitchAnim.addAnimation(self.rAnim)
-		self.btnSwitchAnim.finished.connect(self.hideButtons)
-		self.btnSwitchAnim.start(QAbstractAnimation.DeleteWhenStopped)
+		self.tBtnAnim.addAnimation(self.rAnim)
+		self.tBtnAnim.finished.connect(self.hideButtons)
+		self.tBtnAnim.start(QAbstractAnimation.KeepWhenStopped)
 
 
+	# ...
 	def hideButtons(self):
 		self.teaOneButton.hide()
 		self.teaTwoButton.hide()
-		self.resetButton.show()
 
 
-	# Arranging window in center of the screen by overloading showEvent method
-	def showEvent(self, QShowEvent):
-		self.centerOnScreen()
-
-
-	def centerOnScreen(self):
-		screen = QDesktopWidget()
-		screenGeom = QRect(screen.screenGeometry(self))
-
-		screenCenterX = screenGeom.center().x()
-		screenCenterY = screenGeom.center().y()
-
-		self.move(screenCenterX - self.width() / 2,
-							screenCenterY - self.height() / 2)
-
-
-	# Overload mouseEvent handlers to make window moveable
-	def mousePressEvent(self, QMouseEvent):
-		self.windowPos = QMouseEvent.pos()
-		self.setCursor(QCursor(Qt.SizeAllCursor))
-
-
-	def mouseReleaseEvent(self, QMouseEvent):
-		self.setCursor(QCursor(Qt.ArrowCursor))
-
-
-	def mouseMoveEvent(self, QMouseEvent):
-		pos = QPoint(QMouseEvent.globalPos())
-		self.window().move(pos - self.windowPos)
-
-
+	# ...
 	def prepare_infusion(self):
 		self.sTimer.start(1250)
 
@@ -199,10 +214,6 @@ class Form(QWidget):
 	# Start the infusion process (i.e. the countdown)
 	def infusion(self):
 		self.buttonAnimation()
-
-		# self.teaOneButton.hide()
-		# self.teaTwoButton.hide()
-		# self.resetButton.show()
 
 		self.countdown()
 		self.cTimer.start(1000)
@@ -221,6 +232,9 @@ class Form(QWidget):
 		self.timerLabel.setText("00:00")
 		self.infoLabel.setText("No tea selected")
 
+		if self.tBtnAnim.state() == QAbstractAnimation.Running:
+			self.tBtnAnim.stop()
+
 		self.teaOneButton.show()
 		self.teaTwoButton.show()
 		self.resetButton.hide()
@@ -230,12 +244,14 @@ class Form(QWidget):
 		self.resetButton.fadeEffect.setOpacity(0)
 
 
+	# ...
 	def tea_change(self, sender):
 		if not sender == self.currentTea:
 			self.currentTea = sender
 			self.infusionCycle = 0
 
 
+	# ...
 	def increase_infusion_cycle(self):
 		if self.infusionCycle < 3:
 			self.infusionCycle += 1
@@ -245,6 +261,7 @@ class Form(QWidget):
 			self.infusionCycle = 1
 
 
+	# ...
 	def display_time(self):
 		minutes = self.cTimerValue // 60
 		seconds = self.cTimerValue % 60
@@ -254,6 +271,7 @@ class Form(QWidget):
 		return output_string
 
 
+	# ...
 	def countdown(self):
 		if self.cTimerValue != 0:
 
@@ -273,6 +291,7 @@ if __name__ == '__main__':
 	import sys
 
 	app = QApplication(sys.argv)
+	QFontDatabase.addApplicationFont('resources/fonts/CaviarDreams.ttf')		# Not sure if this is the right place here
 
 	screen = Form()
 

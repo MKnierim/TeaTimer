@@ -38,7 +38,6 @@ Course of Action
 
 
 **Appearance**
-	- Specify things like font, font-size, etc. so that app looks similar on different platforms
 	- Include Display of finished tea (pulsing image of a herbal leaf + text notification - or maybe make window vibrate)
 	- Make the timer display blink before it starts (to show pause at start)
 	- Change background and font color of main window continuously as infusion is getting closer to stop.
