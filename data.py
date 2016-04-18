@@ -10,7 +10,7 @@ class Tea(object):
 		self.name = name
 		self.infusion_times = infusion_times
 
-TEAONE = Tea("Premium\nSencha", (180,60,300))		# temporary infusion durations
+TEAONE = Tea("Premium\nSencha", (10,180,300))		# temporary infusion durations
 TEATWO = Tea("Premium\nBancha", (120,180,240))		# temporary infusion durations
 
 # def function_for_tea(tea):

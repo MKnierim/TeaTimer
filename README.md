@@ -24,11 +24,9 @@ Here are some useful tips to help run the application:
 
 Course of Action
 --------------------------------------------------------------
-**Downhill parking**
-	* Fix some details in button fade animations (timing & spaghetti code)
-
 **Next steps**
 	- Make transitions between states smoother (e.g. fade buttons in&out)
+		+ * Fix some details in button fade animations (timing & spaghetti code)
 		+ I might also use the same transitions to animate the clock (pulsing) before the countdown starts (here setLoopCount(nr of loops) should help)
 
 
@@ -38,7 +36,7 @@ Course of Action
 
 
 **Appearance**
-	- Include Display of finished tea (pulsing image of a herbal leaf + text notification - or maybe make window vibrate)
+	- Include Display of finished tea (pulsing image of a herbal leaf + text notification)
 	- Make the timer display blink before it starts (to show pause at start)
 	- Change background and font color of main window continuously as infusion is getting closer to stop.
 

@@ -26,7 +26,7 @@ WINDOW_HEIGHT = 435
 ## ===============================================================
 ## CLASSES
 
-class UnmoveableButton(QPushButton):
+class ExtendedButton(QPushButton):
 	def __init__(self, text="", opacity=1.0):
 		super().__init__(text)
 
@@ -66,31 +66,41 @@ class Form(QWidget):
 		self.infoLabel = QLabel("No tea selected")
 		self.infoLabel.setObjectName("infoLabel")
 
-		self.teaOneButton = UnmoveableButton(data.TEAONE.name)
+		# Load tea leaves image that are to be shown before and after infusion
+		self.teaPixmap = QPixmap('resources/imgs/leaves.png')
+		self.leavesLabel = QLabel()
+		self.leavesLabel.setObjectName("leavesLabel")
+		self.leavesLabel.setPixmap(self.teaPixmap)
+
+		# Instantiate buttons on the bottom of the app
+		self.teaOneButton = ExtendedButton(data.TEAONE.name)
 		self.teaOneButton.setObjectName("teaOneButton")
-		self.teaOneButton.clicked.connect(self.prepare_infusion)		# Event Handler
+		self.teaOneButton.clicked.connect(self.prepare_infusion)
 
-		self.teaTwoButton = UnmoveableButton(data.TEATWO.name)
+		self.teaTwoButton = ExtendedButton(data.TEATWO.name)
 		self.teaTwoButton.setObjectName("teaTwoButton")
-		self.teaTwoButton.clicked.connect(self.prepare_infusion)		# Event Handler
+		self.teaTwoButton.clicked.connect(self.prepare_infusion)
 
-		self.resetButton = UnmoveableButton("Reset", opacity=0)
+		self.resetButton = ExtendedButton("Reset", opacity=0)
 		self.resetButton.setObjectName("resetButton")
 		self.resetButton.hide()
-		self.resetButton.clicked.connect(self.reset)					# Event Handler
+		self.resetButton.clicked.connect(self.reset)
 
-		self.minButton = UnmoveableButton("_")
+		# Instantiate buttons on the top of the app
+		self.minButton = ExtendedButton("_")
 		self.minButton.setObjectName("minButton")
 		self.minButton.clicked.connect(self.showMinimized)
 
-		self.exitButton = UnmoveableButton("x")
+		self.exitButton = ExtendedButton("x")
 		self.exitButton.setObjectName("exitButton")
 		self.exitButton.clicked.connect(QCoreApplication.instance().quit)
 
-		self.cTimer = QTimer(self)		# Add continous timer for infusion countdown
+		# Add continous timer for infusion countdown
+		self.cTimer = QTimer(self)
 		self.cTimer.timeout.connect(self.countdown)
 
-		self.sTimer = QTimer(self)		# Add single-shot timer for infusion cycle collection (preparation of infusion)
+		# Add single-shot timer for infusion cycle collection (preparation of infusion)
+		self.sTimer = QTimer(self)
 		self.sTimer.setSingleShot(True)
 		self.sTimer.timeout.connect(self.infusion)
 
@@ -124,7 +134,7 @@ class Form(QWidget):
 		grid.setSpacing(0)		# Spacing between widgets - does not work if window is resized
 		grid.setContentsMargins(4, 4, 4, 4)
 		grid.addLayout(topBox, 0, 1, Qt.AlignRight)
-		grid.addWidget(self.timerLabel, 1, 0, 1, -1, Qt.AlignHCenter)		# http://doc.qt.io/qt-5/qgridlayout.html#addWidget
+		grid.addWidget(self.leavesLabel, 1, 0, 1, -1, Qt.AlignHCenter)		# http://doc.qt.io/qt-5/qgridlayout.html#addWidget
 		grid.addWidget(self.infoLabel, 2, 0, 1, -1, Qt.AlignHCenter)
 		grid.addWidget(self.teaOneButton, 3, 0)
 		grid.addWidget(self.teaTwoButton, 3, 1)
@@ -222,6 +232,8 @@ class Form(QWidget):
 	# Alert the user when the tea is finished
 	def finish(self):
 		self.raise_()		# Bring the window to the foreground
+		self.timerLabel.hide()
+		self.infoLabel.setText("Get your tea on!")
 
 
 	# Reset the timer to it's initial state after a tea has been brewed
@@ -229,6 +241,7 @@ class Form(QWidget):
 		self.infusionCycle = 0
 		self.cTimer.stop()
 
+		self.timerLabel.show()
 		self.timerLabel.setText("00:00")
 		self.infoLabel.setText("No tea selected")
 
@@ -281,7 +294,7 @@ class Form(QWidget):
 			self.cTimerValue -= 1
 		else:
 			self.finish()
-			self.reset()
+			# self.reset()
 
 
 ## ===============================================================
