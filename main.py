@@ -63,14 +63,13 @@ class Form(QWidget):
 		self.timerLabel = QLabel("00:00")
 		self.timerLabel.setObjectName("timerLabel")
 
-		self.infoLabel = QLabel("No tea selected")
+		self.infoLabel = QLabel("Select your tea")
 		self.infoLabel.setObjectName("infoLabel")
 
 		# Load tea leaves image that are to be shown before and after infusion
-		self.teaPixmap = QPixmap('resources/imgs/leaves.png')
 		self.leavesLabel = QLabel()
 		self.leavesLabel.setObjectName("leavesLabel")
-		self.leavesLabel.setPixmap(self.teaPixmap)
+		self.leavesLabel.setPixmap(QPixmap('resources/imgs/leaves.png'))
 
 		# Instantiate buttons on the bottom of the app
 		self.teaOneButton = ExtendedButton(data.TEAONE.name)
@@ -85,6 +84,11 @@ class Form(QWidget):
 		self.resetButton.setObjectName("resetButton")
 		self.resetButton.hide()
 		self.resetButton.clicked.connect(self.reset)
+
+		# Load top menu icon images
+		# self.minIconLabel = QLabel()
+		# self.minIconLabel.setObjectName("minIconLabel")
+		# self.minIconLabel.setPixmap(QPixmap('resources/imgs/minIcon.png'))
 
 		# Instantiate buttons on the top of the app
 		self.minButton = ExtendedButton("_")
@@ -144,16 +148,13 @@ class Form(QWidget):
 		self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
 
-	# Arranging window in center of the screen by overloading showEvent method
+	# Arranging window in center of the screen (on which the mouse resides) by overloading showEvent method
 	def showEvent(self, QShowEvent):
-		screen = QDesktopWidget()
-		screenGeom = QRect(screen.screenGeometry(self))
-
-		screenCenterX = screenGeom.center().x()
-		screenCenterY = screenGeom.center().y()
-
-		self.move(screenCenterX - self.width() / 2,
-							screenCenterY - self.height() / 2)
+		frameGeom = self.frameGeometry()
+		screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+		centerPoint = QApplication.desktop().screenGeometry(screen).center()
+		frameGeom.moveCenter(centerPoint)
+		self.move(frameGeom.topLeft())
 
 
 	# Overload mouseEvent handlers to make window moveable

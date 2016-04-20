@@ -25,9 +25,11 @@ Here are some useful tips to help run the application:
 Course of Action
 --------------------------------------------------------------
 **Next steps**
+	- Finish top menu button adaption (load pixmaps on buttons and include hover-functionality)
 	- Make transitions between states smoother (e.g. fade buttons in&out)
 		+ * Fix some details in button fade animations (timing & spaghetti code)
 		+ I might also use the same transitions to animate the clock (pulsing) before the countdown starts (here setLoopCount(nr of loops) should help)
+	- Fix why a new window (or widget) is currently opened after the reset button is clicked
 
 
 **Key Functionality**
