@@ -35,7 +35,6 @@ class ExtendedButton(QPushButton):
 		self.fadeEffect.setOpacity(opacity)
 		self.setGraphicsEffect(self.fadeEffect)
 
-
 	# This event function is overloaded in order to avoid the widget from delegating the event up to the parent.
 	# This way, the pre-existing functionality is skipped, i.e. the window can no longer be moved while hovering over a button.
 	#
@@ -85,17 +84,16 @@ class Form(QWidget):
 		self.resetButton.hide()
 		self.resetButton.clicked.connect(self.reset)
 
-		# Load top menu icon images
-		# self.minIconLabel = QLabel()
-		# self.minIconLabel.setObjectName("minIconLabel")
-		# self.minIconLabel.setPixmap(QPixmap('resources/imgs/minIcon.png'))
-
 		# Instantiate buttons on the top of the app
-		self.minButton = ExtendedButton("_")
+		self.minButton = ExtendedButton()
 		self.minButton.setObjectName("minButton")
 		self.minButton.clicked.connect(self.showMinimized)
 
-		self.exitButton = ExtendedButton("x")
+		self.menuButton = ExtendedButton()
+		self.menuButton.setObjectName("menuButton")
+		# self.menuButton.clicked.connect()
+
+		self.exitButton = ExtendedButton()
 		self.exitButton.setObjectName("exitButton")
 		self.exitButton.clicked.connect(QCoreApplication.instance().quit)
 
@@ -117,9 +115,10 @@ class Form(QWidget):
 		# Container layout for title bar buttons
 		topBox = QHBoxLayout()
 		topBox.addWidget(self.minButton)
-		topBox.addSpacing(10)
+		# topBox.addSpacing(10)
+		topBox.addWidget(self.menuButton)
+		# topBox.addSpacing(10)
 		topBox.addWidget(self.exitButton)
-		topBox.addSpacing(6)
 
 		# # Container layout for tea buttons on bottom
 		# bottomBox = QHBoxLayout()

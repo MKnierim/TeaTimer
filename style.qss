@@ -34,21 +34,6 @@ QPushButton {
 	border-style: none;
 }
 
-QPushButton#teaOneButton, QPushButton#teaTwoButton, QPushButton#resetButton {
-	height: 140px;
-	font-size: 36pt;
-}
-
-QPushButton#minButton, QPushButton#exitButton {
-	background-color: #F5FFCE;
-	color: #617610;
-	font-size: 18pt;
-	font-weight: bold;
-	/*margin-right: 6px;*/
-	margin-top: 0px;
-	/*border: 1px solid red;*/
-}
-
 QPushButton:hover {
 	background-color: #49590C;
 }
@@ -58,10 +43,45 @@ QPushButton:pressed {
 	color: #FFFFFF;
 }
 
+QPushButton#teaOneButton, QPushButton#teaTwoButton, QPushButton#resetButton {
+	height: 140px;
+	font-size: 36pt;
+}
+
 QPushButton#teaOneButton {
 	margin-right: 2px;
 }
 
 QPushButton#teaTwoButton {
 	margin-left: 2px;
+}
+
+QPushButton#minButton, QPushButton#menuButton, QPushButton#exitButton {
+	background-color: #F5FFCE;
+	width: 24px;
+	height: 24px;
+}
+
+QPushButton#minButton {
+	background-image: url(resources/imgs/minIcon.png);
+}
+
+QPushButton#menuButton {
+	background-image: url(resources/imgs/menuIcon.png);
+}
+
+QPushButton#exitButton {
+	background-image: url(resources/imgs/exitIcon.png);
+}
+
+QPushButton#minButton:hover {
+	background-image: url(resources/imgs/minIconHover.png);
+}
+
+QPushButton#menuButton:hover {
+	background-image: url(resources/imgs/menuIconHover.png);
+}
+
+QPushButton#exitButton:hover {
+	background-image: url(resources/imgs/exitIconHover.png);
 }

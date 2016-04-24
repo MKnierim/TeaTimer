@@ -21,6 +21,12 @@ Here are some useful tips to help run the application:
 ...
 
 
+Dependencies
+--------------------------------------------------------------
+* Python3
+* Qt5
+* PyQt5
+
 
 Course of Action
 --------------------------------------------------------------
