@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 ## A simple tea timer for the brewery of excellent tea
+
 __author__ = "Michael T. Knierim"
 
 
@@ -44,11 +45,6 @@ class ExtendedButton(QPushButton):
 		pass
 
 
-# class TeaButtonStack(QStackedWidget):
-# 	def __init__(self):
-# 		super().__init__()
-
-
 class Form(QWidget):
 	def __init__(self, parent=None):
 		super().__init__()
@@ -79,7 +75,7 @@ class Form(QWidget):
 		self.teaTwoButton.setObjectName("teaTwoButton")
 		self.teaTwoButton.clicked.connect(self.prepare_infusion)
 
-		self.resetButton = ExtendedButton("Reset", opacity=0)
+		self.resetButton = ExtendedButton("Reset")		# Add: opacity=0 if I want to restore to fade-effect
 		self.resetButton.setObjectName("resetButton")
 		self.resetButton.hide()
 		self.resetButton.clicked.connect(self.reset)
@@ -102,46 +98,56 @@ class Form(QWidget):
 		self.cTimer.timeout.connect(self.countdown)
 
 		# Add single-shot timer for infusion cycle collection (preparation of infusion)
-		self.sTimer = QTimer(self)
-		self.sTimer.setSingleShot(True)
-		self.sTimer.timeout.connect(self.infusion)
+		# !!! Check if I really need this timer here in the code
+		self.prepTimer = QTimer(self)
+		self.prepTimer.setSingleShot(True)
+		self.prepTimer.timeout.connect(self.infusion)
 
 		# Mapping buttons to tea data
-		self.teaButtons = {
+		self.teaMap = {
 			self.teaOneButton : data.TEAONE,
 			self.teaTwoButton : data.TEATWO
 		}
 
+		### Layouting
 		# Container layout for title bar buttons
-		topBox = QHBoxLayout()
-		topBox.addWidget(self.minButton)
-		# topBox.addSpacing(10)
-		topBox.addWidget(self.menuButton)
-		# topBox.addSpacing(10)
-		topBox.addWidget(self.exitButton)
+		self.topBox = QHBoxLayout()
+		self.topBox.addWidget(self.minButton)
+		self.topBox.addWidget(self.menuButton)
+		self.topBox.addWidget(self.exitButton)
 
-		# # Container layout for tea buttons on bottom
-		# bottomBox = QHBoxLayout()
-		# bottomBox.addWidget(self.teaOneButton)
-		# topBox.addSpacing(10)
-		# bottomBox.addWidget(self.teaTwoButton)
+		# Stacked widget for leaf/timer display
+		self.middleStack = QStackedWidget()
+		self.middleStack.addWidget(self.leavesLabel)
+		self.middleStack.addWidget(self.timerLabel)
 
-		# # Create stacked layout for bottom bar buttons
-		# bottomStack = QStackedLayout()
-		# bottomStack.addChildLayout(bottomBox)
-		# bottomStack.addWidget(self.resetButton)
+		# Container widget and layout for tea buttons on bottom
+		self.teaButtons = QWidget()
+		self.bottomBox = QHBoxLayout()
+		self.bottomBox.setSpacing(0)
+		self.bottomBox.setContentsMargins(0, 0, 0, 0)
+		self.bottomBox.addWidget(self.teaOneButton)
+		self.bottomBox.addWidget(self.teaTwoButton)
+		self.teaButtons.setLayout(self.bottomBox)
 
-		# Arrange UI elements in a layout
+		# Stacked widget for bottom bar buttons
+		self.bottomStack = QStackedWidget()
+		self.bottomStack.addWidget(self.teaButtons)
+		self.bottomStack.addWidget(self.resetButton)
+
+
+		# Final arrangement of UI elements in a grid layout
 		grid = QGridLayout()
 		self.setLayout(grid)		# Set the QGridLayout as the window's main layout
 		grid.setSpacing(0)		# Spacing between widgets - does not work if window is resized
 		grid.setContentsMargins(4, 4, 4, 4)
-		grid.addLayout(topBox, 0, 1, Qt.AlignRight)
-		grid.addWidget(self.leavesLabel, 1, 0, 1, -1, Qt.AlignHCenter)		# http://doc.qt.io/qt-5/qgridlayout.html#addWidget
+		grid.addLayout(self.topBox, 0, 1, Qt.AlignRight)
+		# grid.addWidget(self.leavesLabel, 1, 0, 1, -1, Qt.AlignHCenter)		# http://doc.qt.io/qt-5/qgridlayout.html#addWidget
+		grid.addWidget(self.middleStack, 1, 0, 1, -1, Qt.AlignHCenter)
 		grid.addWidget(self.infoLabel, 2, 0, 1, -1, Qt.AlignHCenter)
-		grid.addWidget(self.teaOneButton, 3, 0)
-		grid.addWidget(self.teaTwoButton, 3, 1)
-		grid.addWidget(self.resetButton, 3, 0, 1, 2)
+		# grid.addWidget(self.teaButtons, 3, 0, 1, -1)
+		# grid.addWidget(self.resetButton, 3, 0, 1, 2)
+		grid.addWidget(self.bottomStack, 3 , 0, 1, -1)
 
 		self.setStyleSheet(open("style.qss", "r").read())
 		self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -210,11 +216,12 @@ class Form(QWidget):
 
 	# ...
 	def prepare_infusion(self):
-		self.sTimer.start(1250)
+		self.prepTimer.start(1250)
 
+		self.middleStack.setCurrentIndex(1)
 		self.tea_change(self.sender())		# Check if a new type of tea is to be brewed
 		self.increase_infusion_cycle()
-		self.cTimerValue = self.teaButtons[self.currentTea].infusion_times[self.infusionCycle-1]
+		self.cTimerValue = self.teaMap[self.currentTea].infusion_times[self.infusionCycle-1]
 
 		self.timerLabel.setText(self.display_time())
 		displayText = self.currentTea.text().replace("\n", " ") + " - Cycle " + str(self.infusionCycle)
@@ -223,7 +230,8 @@ class Form(QWidget):
 
 	# Start the infusion process (i.e. the countdown)
 	def infusion(self):
-		self.buttonAnimation()
+		# self.buttonAnimation()
+		self.bottomStack.setCurrentIndex(1)
 
 		self.countdown()
 		self.cTimer.start(1000)
@@ -241,20 +249,22 @@ class Form(QWidget):
 		self.infusionCycle = 0
 		self.cTimer.stop()
 
-		self.timerLabel.show()
-		self.timerLabel.setText("00:00")
+		# self.timerLabel.show()
+		# self.timerLabel.setText("00:00")
+		self.middleStack.setCurrentIndex(0)		# Show leaf image again
 		self.infoLabel.setText("No tea selected")
 
-		if self.tBtnAnim.state() == QAbstractAnimation.Running:
-			self.tBtnAnim.stop()
+		# if self.tBtnAnim.state() == QAbstractAnimation.Running:
+		# 	self.tBtnAnim.stop()
 
-		self.teaOneButton.show()
-		self.teaTwoButton.show()
-		self.resetButton.hide()
+		# self.teaOneButton.show()
+		# self.teaTwoButton.show()
+		# self.resetButton.hide()
 
-		self.teaOneButton.fadeEffect.setOpacity(1.0)
-		self.teaTwoButton.fadeEffect.setOpacity(1.0)
-		self.resetButton.fadeEffect.setOpacity(0)
+		# self.teaOneButton.fadeEffect.setOpacity(1.0)
+		# self.teaTwoButton.fadeEffect.setOpacity(1.0)
+		# self.resetButton.fadeEffect.setOpacity(0)
+		self.bottomStack.setCurrentIndex(0)
 
 
 	# ...

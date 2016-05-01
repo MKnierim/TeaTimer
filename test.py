@@ -43,9 +43,18 @@ class Form(QWidget):
 
 		self.teaOneButton = UnmoveableButton("Tea One")
 		self.teaOneButton.setObjectName("teaOneButton")
+		# self.teaOneButton.clicked.connect()
 
 		self.teaTwoButton = UnmoveableButton("Tea Two")
 		self.teaTwoButton.setObjectName("teaTwoButton")
+
+		self.teaButtons = QWidget()
+		self.teaButtonsLayout = QHBoxLayout()
+		self.teaButtonsLayout.addWidget(self.teaOneButton)
+		self.teaButtonsLayout.addWidget(self.teaTwoButton)
+		self.teaButtons.setLayout(self.teaButtonsLayout)
+		self.stackLayout = QStackedLayout()
+		self.stackLayout.addWidget(self.teaButtons)
 
 		# Arrange UI elements in a layout
 		grid = QGridLayout()
@@ -54,11 +63,9 @@ class Form(QWidget):
 		grid.setContentsMargins(4, 4, 4, 4)
 		grid.addWidget(self.timerLabel, 0, 0, 1, -1, Qt.AlignHCenter)		# http://doc.qt.io/qt-5/qgridlayout.html#addWidget
 		grid.addWidget(self.infoLabel, 1, 0, 1, -1, Qt.AlignHCenter)
-		grid.addWidget(self.teaOneButton, 2, 0)
-		grid.addWidget(self.teaTwoButton, 2, 1)
+		grid.addLayout(self.stackLayout, 2, 0, -1, -1)
 
 		self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
-
 
 	# Arranging window in center of the screen by overloading showEvent method
 	def showEvent(self, QShowEvent):
@@ -87,7 +94,6 @@ class Form(QWidget):
 
 
 	def mouseMoveEvent(self, QMouseEvent):
-		# print (self.childAt(QMouseEvent.pos()) == QLabel)
 		pos = QPoint(QMouseEvent.globalPos())
 		self.window().move(pos - self.windowPos)
 
