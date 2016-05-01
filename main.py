@@ -28,13 +28,8 @@ WINDOW_HEIGHT = 435
 ## CLASSES
 
 class ExtendedButton(QPushButton):
-	def __init__(self, text="", opacity=1.0):
+	def __init__(self, text=""):
 		super().__init__(text)
-
-		# Add an opacity property to every button instance - makes it animatable later
-		self.fadeEffect = QGraphicsOpacityEffect(self)
-		self.fadeEffect.setOpacity(opacity)
-		self.setGraphicsEffect(self.fadeEffect)
 
 	# This event function is overloaded in order to avoid the widget from delegating the event up to the parent.
 	# This way, the pre-existing functionality is skipped, i.e. the window can no longer be moved while hovering over a button.
@@ -45,14 +40,53 @@ class ExtendedButton(QPushButton):
 		pass
 
 
+class ExtendedStackedWidget(QStackedWidget):
+	def __init__(self, parent = None):
+		QStackedWidget.__init__(self, parent)
+
+	def setCurrentIndex(self, index):
+		self.fader_widget = FaderWidget(self.currentWidget(), self.widget(index))
+		QStackedWidget.setCurrentIndex(self, index)
+
+
+class FaderWidget(QWidget):
+	def __init__(self, old_widget, new_widget):
+		QWidget.__init__(self, new_widget)
+
+		self.old_pixmap = QPixmap(new_widget.size())
+		self.old_pixmap.fill(QColor(245,255,206,255))		# This works for now, but could be problematic later when I alter the background color
+		old_widget.render(self.old_pixmap, flags=QWidget.DrawChildren)
+		self.pixmap_opacity = 1.0
+
+		self.timeline = QTimeLine()
+		self.timeline.valueChanged.connect(self.animate)
+		self.timeline.finished.connect(self.close)
+		self.timeline.setDuration(333)
+		self.timeline.start()
+
+		self.resize(new_widget.size())
+		self.show()
+
+	def paintEvent(self, event):
+		painter = QPainter()
+		painter.begin(self)
+		painter.setOpacity(self.pixmap_opacity)
+		painter.drawPixmap(0, 0, self.old_pixmap)
+		painter.end()
+
+	def animate(self, value):
+		self.pixmap_opacity = 1.0 - value
+		self.repaint()
+
+
 class Form(QWidget):
 	def __init__(self, parent=None):
 		super().__init__()
 
 		# Process variables - They change with user input decisions
-		self.infusionCycle = 0		# Keep track of current infusion cycle (Integer)
-		self.currentTea = None		# Keep track of current chosen tea (Object)
-		self.cTimerValue = 0		# Keep track of remaining seconds in timer (Integer)
+		self.infusionCycle = 0				# Keep track of current infusion cycle (Integer)
+		self.currentTea = None				# Keep track of current chosen tea (Object)
+		self.countdownTimerValue = 0		# Keep track of remaining seconds in timer (Integer)
 
 		# Declare and specify UI elements
 		self.timerLabel = QLabel("00:00")
@@ -75,7 +109,7 @@ class Form(QWidget):
 		self.teaTwoButton.setObjectName("teaTwoButton")
 		self.teaTwoButton.clicked.connect(self.prepare_infusion)
 
-		self.resetButton = ExtendedButton("Reset")		# Add: opacity=0 if I want to restore to fade-effect
+		self.resetButton = ExtendedButton("Reset")
 		self.resetButton.setObjectName("resetButton")
 		self.resetButton.hide()
 		self.resetButton.clicked.connect(self.reset)
@@ -94,8 +128,8 @@ class Form(QWidget):
 		self.exitButton.clicked.connect(QCoreApplication.instance().quit)
 
 		# Add continous timer for infusion countdown
-		self.cTimer = QTimer(self)
-		self.cTimer.timeout.connect(self.countdown)
+		self.countdownTimer = QTimer(self)
+		self.countdownTimer.timeout.connect(self.countdown)
 
 		# Add single-shot timer for infusion cycle collection (preparation of infusion)
 		# !!! Check if I really need this timer here in the code
@@ -117,7 +151,7 @@ class Form(QWidget):
 		self.topBox.addWidget(self.exitButton)
 
 		# Stacked widget for leaf/timer display
-		self.middleStack = QStackedWidget()
+		self.middleStack = ExtendedStackedWidget()
 		self.middleStack.addWidget(self.leavesLabel)
 		self.middleStack.addWidget(self.timerLabel)
 
@@ -131,7 +165,7 @@ class Form(QWidget):
 		self.teaButtons.setLayout(self.bottomBox)
 
 		# Stacked widget for bottom bar buttons
-		self.bottomStack = QStackedWidget()
+		self.bottomStack = ExtendedStackedWidget()
 		self.bottomStack.addWidget(self.teaButtons)
 		self.bottomStack.addWidget(self.resetButton)
 
@@ -142,11 +176,8 @@ class Form(QWidget):
 		grid.setSpacing(0)		# Spacing between widgets - does not work if window is resized
 		grid.setContentsMargins(4, 4, 4, 4)
 		grid.addLayout(self.topBox, 0, 1, Qt.AlignRight)
-		# grid.addWidget(self.leavesLabel, 1, 0, 1, -1, Qt.AlignHCenter)		# http://doc.qt.io/qt-5/qgridlayout.html#addWidget
 		grid.addWidget(self.middleStack, 1, 0, 1, -1, Qt.AlignHCenter)
 		grid.addWidget(self.infoLabel, 2, 0, 1, -1, Qt.AlignHCenter)
-		# grid.addWidget(self.teaButtons, 3, 0, 1, -1)
-		# grid.addWidget(self.resetButton, 3, 0, 1, 2)
 		grid.addWidget(self.bottomStack, 3 , 0, 1, -1)
 
 		self.setStyleSheet(open("style.qss", "r").read())
@@ -180,38 +211,38 @@ class Form(QWidget):
 
 
 	# ...
-	def buttonAnimation(self):
-		DURATION = 300
+		# def buttonAnimation(self):
+		# 	DURATION = 300
 
-		self.resetButton.show()
+		# 	self.resetButton.show()
 
-		self.b1Anim = QPropertyAnimation(self.teaOneButton.fadeEffect, b"opacity")
-		self.b1Anim.setDuration(DURATION)
-		self.b1Anim.setStartValue(1.0)
-		self.b1Anim.setEndValue(0)
+		# 	self.b1Anim = QPropertyAnimation(self.teaOneButton.fadeEffect, b"opacity")
+		# 	self.b1Anim.setDuration(DURATION)
+		# 	self.b1Anim.setStartValue(1.0)
+		# 	self.b1Anim.setEndValue(0)
 
-		self.b2Anim = QPropertyAnimation(self.teaTwoButton.fadeEffect, b"opacity")
-		self.b2Anim.setDuration(DURATION)
-		self.b2Anim.setStartValue(1.0)
-		self.b2Anim.setEndValue(0)
+		# 	self.b2Anim = QPropertyAnimation(self.teaTwoButton.fadeEffect, b"opacity")
+		# 	self.b2Anim.setDuration(DURATION)
+		# 	self.b2Anim.setStartValue(1.0)
+		# 	self.b2Anim.setEndValue(0)
 
-		self.rAnim = QPropertyAnimation(self.resetButton.fadeEffect, b"opacity")
-		self.rAnim.setDuration(DURATION)
-		self.rAnim.setStartValue(0)
-		self.rAnim.setEndValue(1.0)
+		# 	self.rAnim = QPropertyAnimation(self.resetButton.fadeEffect, b"opacity")
+		# 	self.rAnim.setDuration(DURATION)
+		# 	self.rAnim.setStartValue(0)
+		# 	self.rAnim.setEndValue(1.0)
 
-		self.tBtnAnim = QParallelAnimationGroup()
-		self.tBtnAnim.addAnimation(self.b1Anim)
-		self.tBtnAnim.addAnimation(self.b2Anim)
-		self.tBtnAnim.addAnimation(self.rAnim)
-		self.tBtnAnim.finished.connect(self.hideButtons)
-		self.tBtnAnim.start(QAbstractAnimation.KeepWhenStopped)
+		# 	self.tBtnAnim = QParallelAnimationGroup()
+		# 	self.tBtnAnim.addAnimation(self.b1Anim)
+		# 	self.tBtnAnim.addAnimation(self.b2Anim)
+		# 	self.tBtnAnim.addAnimation(self.rAnim)
+		# 	self.tBtnAnim.finished.connect(self.hideButtons)
+		# 	self.tBtnAnim.start(QAbstractAnimation.KeepWhenStopped)
 
 
-	# ...
-	def hideButtons(self):
-		self.teaOneButton.hide()
-		self.teaTwoButton.hide()
+		# # ...
+		# def hideButtons(self):
+		# 	self.teaOneButton.hide()
+		# 	self.teaTwoButton.hide()
 
 
 	# ...
@@ -221,7 +252,7 @@ class Form(QWidget):
 		self.middleStack.setCurrentIndex(1)
 		self.tea_change(self.sender())		# Check if a new type of tea is to be brewed
 		self.increase_infusion_cycle()
-		self.cTimerValue = self.teaMap[self.currentTea].infusion_times[self.infusionCycle-1]
+		self.countdownTimerValue = self.teaMap[self.currentTea].infusion_times[self.infusionCycle-1]
 
 		self.timerLabel.setText(self.display_time())
 		displayText = self.currentTea.text().replace("\n", " ") + " - Cycle " + str(self.infusionCycle)
@@ -234,24 +265,27 @@ class Form(QWidget):
 		self.bottomStack.setCurrentIndex(1)
 
 		self.countdown()
-		self.cTimer.start(1000)
+		self.countdownTimer.start(1000)
 
 
 	# Alert the user when the tea is finished
 	def finish(self):
-		self.raise_()		# Bring the window to the foreground
-		self.timerLabel.hide()
+		self.countdownTimer.stop()				# Stop the countdown timer
+		self.raise_()							# Bring the window to the foreground
+		self.middleStack.setCurrentIndex(0)		# Show leaf image again
 		self.infoLabel.setText("Get your tea on!")
 
 
 	# Reset the timer to it's initial state after a tea has been brewed
 	def reset(self):
 		self.infusionCycle = 0
-		self.cTimer.stop()
+		self.countdownTimer.stop()
 
 		# self.timerLabel.show()
 		# self.timerLabel.setText("00:00")
-		self.middleStack.setCurrentIndex(0)		# Show leaf image again
+		if self.middleStack.currentIndex() != 0:		# Show leaf image only if not yet present
+			self.middleStack.setCurrentIndex(0)
+
 		self.infoLabel.setText("No tea selected")
 
 		# if self.tBtnAnim.state() == QAbstractAnimation.Running:
@@ -286,8 +320,8 @@ class Form(QWidget):
 
 	# ...
 	def display_time(self):
-		minutes = self.cTimerValue // 60
-		seconds = self.cTimerValue % 60
+		minutes = self.countdownTimerValue // 60
+		seconds = self.countdownTimerValue % 60
 
 		# Use python string formatting to format in leading zeros
 		output_string = "{0:02}:{1:02}".format(minutes, seconds)
@@ -296,15 +330,14 @@ class Form(QWidget):
 
 	# ...
 	def countdown(self):
-		if self.cTimerValue != 0:
+		if self.countdownTimerValue != 0:
 
 			output_string = self.display_time()
 
 			self.timerLabel.setText(output_string)
-			self.cTimerValue -= 1
+			self.countdownTimerValue -= 1
 		else:
 			self.finish()
-			# self.reset()
 
 
 ## ===============================================================
