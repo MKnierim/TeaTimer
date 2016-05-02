@@ -54,14 +54,14 @@ class FaderWidget(QWidget):
 		QWidget.__init__(self, new_widget)
 
 		self.old_pixmap = QPixmap(new_widget.size())
-		self.old_pixmap.fill(QColor(245,255,206,255))		# This works for now, but could be problematic later when I alter the background color
+		self.old_pixmap.fill(Form.currentBackgroundColor)		# This works for now, but could be problematic later when I alter the background color
 		old_widget.render(self.old_pixmap, flags=QWidget.DrawChildren)
 		self.pixmap_opacity = 1.0
 
 		self.timeline = QTimeLine()
 		self.timeline.valueChanged.connect(self.animate)
 		self.timeline.finished.connect(self.close)
-		self.timeline.setDuration(333)
+		self.timeline.setDuration(200)
 		self.timeline.start()
 
 		self.resize(new_widget.size())
@@ -80,6 +80,10 @@ class FaderWidget(QWidget):
 
 
 class Form(QWidget):
+	STARTCOLOR = QColor(245, 255, 206, 255)
+	ENDCOLOR = QColor(201, 246, 33, 255)
+	currentBackgroundColor = STARTCOLOR
+
 	def __init__(self, parent=None):
 		super().__init__()
 
@@ -87,6 +91,14 @@ class Form(QWidget):
 		self.infusionCycle = 0				# Keep track of current infusion cycle (Integer)
 		self.currentTea = None				# Keep track of current chosen tea (Object)
 		self.countdownTimerValue = 0		# Keep track of remaining seconds in timer (Integer)
+
+		# !!! Make this simpler and apply naming conventions
+		self.REDCHANNELDIFF = Form.STARTCOLOR.red() - Form.ENDCOLOR.red()
+		self.GREENCHANNELDIFF = Form.STARTCOLOR.green() - Form.ENDCOLOR.green()
+		self.BLUECHANNELDIFF = Form.STARTCOLOR.blue() - Form.ENDCOLOR.blue()
+		self.realCurrentBackgroundColor = [245.0, 255.0, 206.0, 255]		# Necessary in order to store precise rgb values - I should also check out QRgba64 objects - they might include what I need
+		self.mainPalette = QPalette()
+		self.mainPalette.setColor(QPalette.Background,Form.currentBackgroundColor)
 
 		# Declare and specify UI elements
 		self.timerLabel = QLabel("00:00")
@@ -180,6 +192,7 @@ class Form(QWidget):
 		grid.addWidget(self.infoLabel, 2, 0, 1, -1, Qt.AlignHCenter)
 		grid.addWidget(self.bottomStack, 3 , 0, 1, -1)
 
+		self.setPalette(self.mainPalette)
 		self.setStyleSheet(open("style.qss", "r").read())
 		self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
@@ -261,7 +274,6 @@ class Form(QWidget):
 
 	# Start the infusion process (i.e. the countdown)
 	def infusion(self):
-		# self.buttonAnimation()
 		self.bottomStack.setCurrentIndex(1)
 
 		self.countdown()
@@ -281,25 +293,27 @@ class Form(QWidget):
 		self.infusionCycle = 0
 		self.countdownTimer.stop()
 
-		# self.timerLabel.show()
+		# !!! Maybe I could simplify this code here
+		Form.currentBackgroundColor = Form.STARTCOLOR
+		self.realCurrentBackgroundColor = [245.0, 255.0, 206.0, 255]
+		self.mainPalette.setColor(QPalette.Background,Form.currentBackgroundColor)
+		self.setPalette(self.mainPalette)
+
+		self.infoLabel.setText("No tea selected")
+
 		# self.timerLabel.setText("00:00")
 		if self.middleStack.currentIndex() != 0:		# Show leaf image only if not yet present
 			self.middleStack.setCurrentIndex(0)
 
-		self.infoLabel.setText("No tea selected")
+		self.bottomStack.setCurrentIndex(0)
 
 		# if self.tBtnAnim.state() == QAbstractAnimation.Running:
 		# 	self.tBtnAnim.stop()
 
-		# self.teaOneButton.show()
-		# self.teaTwoButton.show()
-		# self.resetButton.hide()
 
-		# self.teaOneButton.fadeEffect.setOpacity(1.0)
-		# self.teaTwoButton.fadeEffect.setOpacity(1.0)
-		# self.resetButton.fadeEffect.setOpacity(0)
-		self.bottomStack.setCurrentIndex(0)
-
+	# ...
+	def test_method(self):
+		pass
 
 	# ...
 	def tea_change(self, sender):
@@ -334,10 +348,28 @@ class Form(QWidget):
 
 			output_string = self.display_time()
 
+			self.adaptBackgroundColor()
+
 			self.timerLabel.setText(output_string)
 			self.countdownTimerValue -= 1
 		else:
 			self.finish()
+
+	# This function is used to compute the new background color value each second
+	def adaptBackgroundColor(self):
+		changeValue = 1.0/(self.teaMap[self.currentTea].infusion_times[self.infusionCycle-1])		# Actually not necessary to calculate it here every time... could go to constructor
+
+		newRed = self.realCurrentBackgroundColor[0] - (self.REDCHANNELDIFF * changeValue)
+		newGreen = self.realCurrentBackgroundColor[1] - (self.GREENCHANNELDIFF * changeValue)
+		newBlue = self.realCurrentBackgroundColor[2] - (self.BLUECHANNELDIFF * changeValue)
+
+		self.realCurrentBackgroundColor = [newRed, newGreen, newBlue, 255]
+		Form.currentBackgroundColor = QColor(newRed, newGreen, newBlue, 255)
+
+		# print(self.realCurrentBackgroundColor)
+		# print(Form.currentBackgroundColor.getRgb())
+		self.mainPalette.setColor(QPalette.Background,Form.currentBackgroundColor)
+		self.setPalette(self.mainPalette)
 
 
 ## ===============================================================

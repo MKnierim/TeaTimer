@@ -31,8 +31,11 @@ Dependencies
 Course of Action
 --------------------------------------------------------------
 **Next steps**
+	- See if I can make the color change over time into nicer code
+	+ Also figure out how to apply color change without disrupting the whole qss
+		* Possible but probably to complicate: rewrite style.qss and reload it every second
+	+ Also figure out a way to adapt fader transitions to changing background color
 	- Make transitions between states smoother (e.g. fade buttons in&out)
-		+ * Fix some details in button fade animations (timing & spaghetti code)
 		+ I might also use the same transitions to animate the clock (pulsing) before the countdown starts (here setLoopCount(nr of loops) should help)
 
 
@@ -44,7 +47,6 @@ Course of Action
 **Appearance**
 	- Include Display of finished tea (pulsing image of a herbal leaf + text notification)
 	- Make the timer display blink before it starts (to show pause at start)
-	- Change background and font color of main window continuously as infusion is getting closer to stop.
 
 
 **Deployment**

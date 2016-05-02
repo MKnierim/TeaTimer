@@ -4,7 +4,7 @@ QWidget {
 }
 
 Form {
-	background-color: #F5FFCE;
+	/*background-color: #F5FFCE;*/
 	margin: 0px;
 	padding: 0px;
 }
@@ -30,23 +30,23 @@ QLabel#leavesLabel {
 }
 
 QPushButton {
-	background-color: #617610;
-	color: #F5FFCE;
 	border-style: none;
 }
 
-QPushButton:hover {
+QPushButton#teaOneButton, QPushButton#teaTwoButton, QPushButton#resetButton {
+	background-color: #617610;
+	color: #F5FFCE;
+	height: 140px;
+	font-size: 36pt;
+}
+
+QPushButton#teaOneButton:hover, QPushButton#teaTwoButton:hover, QPushButton#resetButton:hover {
 	background-color: #49590C;
 }
 
-QPushButton:pressed {
+QPushButton#teaOneButton:pressed, QPushButton#teaTwoButton:pressed, QPushButton#resetButton:pressed {
 	background-color: #384509;
 	color: #FFFFFF;
-}
-
-QPushButton#teaOneButton, QPushButton#teaTwoButton, QPushButton#resetButton {
-	height: 140px;
-	font-size: 36pt;
 }
 
 QPushButton#teaOneButton {
@@ -58,7 +58,7 @@ QPushButton#teaTwoButton {
 }
 
 QPushButton#minButton, QPushButton#menuButton, QPushButton#exitButton {
-	background-color: #F5FFCE;
+	/*background-color: #F5FFCE;*/
 	width: 24px;
 	height: 24px;
 }
