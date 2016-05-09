@@ -87,10 +87,11 @@ class Form(QWidget):
 	def __init__(self, parent=None):
 		super().__init__()
 
-		# Process variables - They change with user input decisions
+		### Process variables
+		### -------------------------------------------------------------------
 		self.infusionCycle = 0				# Keep track of current infusion cycle (Integer)
 		self.currentTea = None				# Keep track of current chosen tea (Object)
-		self.countdownTimerValue = 0		# Keep track of remaining seconds in timer (Integer)
+		self.countdownTimerValue = 0		# Keep track of remaining seconds in timer (Integer) - !!! Could it not also work to set a continous timer?
 
 		# !!! Make this simpler and apply naming conventions
 		self.REDCHANNELDIFF = Form.STARTCOLOR.red() - Form.ENDCOLOR.red()
@@ -99,8 +100,11 @@ class Form(QWidget):
 		self.realCurrentBackgroundColor = [245.0, 255.0, 206.0, 255]		# Necessary in order to store precise rgb values - I should also check out QRgba64 objects - they might include what I need
 		self.mainPalette = QPalette()
 		self.mainPalette.setColor(QPalette.Background,Form.currentBackgroundColor)
+		self.changeValue = 1.0
 
-		# Declare and specify UI elements
+
+		### UI elements
+		### -------------------------------------------------------------------
 		self.timerLabel = QLabel("00:00")
 		self.timerLabel.setObjectName("timerLabel")
 
@@ -133,12 +137,47 @@ class Form(QWidget):
 
 		self.menuButton = ExtendedButton()
 		self.menuButton.setObjectName("menuButton")
-		# self.menuButton.clicked.connect()
+		self.menuButton.clicked.connect(self.tea_menu)
 
 		self.exitButton = ExtendedButton()
 		self.exitButton.setObjectName("exitButton")
 		self.exitButton.clicked.connect(QCoreApplication.instance().quit)
 
+		# Tea change menu widgets
+		# !!! Figure out how to make button groups or something similar here
+		self.teaOneName = QLineEdit(data.TEAONE.name)
+		self.teaOneCycleOne = QSpinBox()
+		self.teaOneCycleOne.setRange(0, 86400)
+		self.teaOneCycleOne.setValue(data.TEAONE.infusion_times[0])
+		self.teaOneCycleTwo = QSpinBox()
+		self.teaOneCycleTwo.setRange(0, 86400)
+		self.teaOneCycleTwo.setValue(data.TEAONE.infusion_times[1])
+		self.teaOneCycleThree = QSpinBox()
+		self.teaOneCycleThree.setRange(0, 86400)
+		self.teaOneCycleThree.setValue(data.TEAONE.infusion_times[2])
+		# self.teaOneName.setObjectName("teaOneName")
+		# self.teaOneCycleOne.setObjectName("teaOneCycleOne")
+		# self.teaOneCycleTwo.setObjectName("teaOneCycleTwo")
+		# self.teaOneCycleThree.setObjectName("teaOneCycleThree")
+
+		self.teaTwoName = QLineEdit(data.TEATWO.name)
+		self.teaTwoCycleOne = QSpinBox()
+		self.teaTwoCycleOne.setRange(0, 86400)
+		self.teaTwoCycleOne.setValue(data.TEATWO.infusion_times[0])
+		self.teaTwoCycleTwo = QSpinBox()
+		self.teaTwoCycleTwo.setRange(0, 86400)
+		self.teaTwoCycleTwo.setValue(data.TEATWO.infusion_times[1])
+		self.teaTwoCycleThree = QSpinBox()
+		self.teaTwoCycleThree.setRange(0, 86400)
+		self.teaTwoCycleThree.setValue(data.TEATWO.infusion_times[2])
+		# self.teaTwoName.setObjectName("teaTwoName")
+		# self.teaTwoCycleOne.setObjectName("teaTwoCycleOne")
+		# self.teaTwoCycleTwo.setObjectName("teaTwoCycleTwo")
+		# self.teaTwoCycleThree.setObjectName("teaTwoCycleThree")
+
+
+		### ...
+		### -------------------------------------------------------------------
 		# Add continous timer for infusion countdown
 		self.countdownTimer = QTimer(self)
 		self.countdownTimer.timeout.connect(self.countdown)
@@ -155,42 +194,76 @@ class Form(QWidget):
 			self.teaTwoButton : data.TEATWO
 		}
 
-		### Layouting
+
+		### Layouts
+		### -------------------------------------------------------------------
 		# Container layout for title bar buttons
 		self.topBox = QHBoxLayout()
 		self.topBox.addWidget(self.minButton)
 		self.topBox.addWidget(self.menuButton)
 		self.topBox.addWidget(self.exitButton)
 
+		# Container widget and layout for infusion action buttons on bottom
+		self.teaButtons = QWidget()
+		self.teaButtonsBox = QHBoxLayout()
+		self.teaButtonsBox.setSpacing(0)
+		self.teaButtonsBox.setContentsMargins(0, 0, 0, 0)
+		self.teaButtonsBox.addWidget(self.teaOneButton)
+		self.teaButtonsBox.addWidget(self.teaTwoButton)
+		self.teaButtons.setLayout(self.teaButtonsBox)
+
+		# Container widgets and layouts for tea change menus on bottom
+		self.teaOneMenuBox = QGridLayout()
+		self.teaOneMenuBox.setSpacing(4)
+		self.teaOneMenuBox.setContentsMargins(4, 0, 4, 0)
+		self.teaOneMenuBox.addWidget(self.teaOneName, 1, 0, 1, -1)
+		self.teaOneMenuBox.addWidget(self.teaOneCycleOne, 2, 0)
+		self.teaOneMenuBox.addWidget(self.teaOneCycleTwo, 2, 1)
+		self.teaOneMenuBox.addWidget(self.teaOneCycleThree, 2, 2)
+		self.teaOneMenu = QWidget()
+		self.teaOneMenu.setObjectName("teaOneMenu")
+		self.teaOneMenu.setLayout(self.teaOneMenuBox)
+
+		self.teaTwoMenuBox = QGridLayout()
+		self.teaTwoMenuBox.setSpacing(4)
+		self.teaTwoMenuBox.setContentsMargins(4, 0, 4, 0)
+		self.teaTwoMenuBox.addWidget(self.teaTwoName, 1, 0, 1, -1)
+		self.teaTwoMenuBox.addWidget(self.teaTwoCycleOne, 2, 0)
+		self.teaTwoMenuBox.addWidget(self.teaTwoCycleTwo, 2, 1)
+		self.teaTwoMenuBox.addWidget(self.teaTwoCycleThree, 2, 2)
+		self.teaTwoMenu = QWidget()
+		self.teaTwoMenu.setObjectName("teaTwoMenu")
+		self.teaTwoMenu.setLayout(self.teaTwoMenuBox)
+
+		self.teaMenusBox = QHBoxLayout()
+		self.teaMenusBox.setSpacing(4)
+		self.teaMenusBox.setContentsMargins(0, 0, 0, 0)
+		self.teaMenusBox.addWidget(self.teaOneMenu)
+		self.teaMenusBox.addWidget(self.teaTwoMenu)
+
+		self.teaMenus = QWidget()
+		self.teaMenus.setLayout(self.teaMenusBox)
+
 		# Stacked widget for leaf/timer display
 		self.middleStack = ExtendedStackedWidget()
 		self.middleStack.addWidget(self.leavesLabel)
 		self.middleStack.addWidget(self.timerLabel)
 
-		# Container widget and layout for tea buttons on bottom
-		self.teaButtons = QWidget()
-		self.bottomBox = QHBoxLayout()
-		self.bottomBox.setSpacing(0)
-		self.bottomBox.setContentsMargins(0, 0, 0, 0)
-		self.bottomBox.addWidget(self.teaOneButton)
-		self.bottomBox.addWidget(self.teaTwoButton)
-		self.teaButtons.setLayout(self.bottomBox)
-
 		# Stacked widget for bottom bar buttons
 		self.bottomStack = ExtendedStackedWidget()
 		self.bottomStack.addWidget(self.teaButtons)
 		self.bottomStack.addWidget(self.resetButton)
-
+		self.bottomStack.addWidget(self.teaMenus)
 
 		# Final arrangement of UI elements in a grid layout
 		grid = QGridLayout()
-		self.setLayout(grid)		# Set the QGridLayout as the window's main layout
 		grid.setSpacing(0)		# Spacing between widgets - does not work if window is resized
 		grid.setContentsMargins(4, 4, 4, 4)
 		grid.addLayout(self.topBox, 0, 1, Qt.AlignRight)
 		grid.addWidget(self.middleStack, 1, 0, 1, -1, Qt.AlignHCenter)
 		grid.addWidget(self.infoLabel, 2, 0, 1, -1, Qt.AlignHCenter)
 		grid.addWidget(self.bottomStack, 3 , 0, 1, -1)
+		self.setLayout(grid)		# Set the QGridLayout as the window's main layout
 
 		self.setPalette(self.mainPalette)
 		self.setStyleSheet(open("style.qss", "r").read())
@@ -252,11 +325,6 @@ class Form(QWidget):
 		# 	self.tBtnAnim.start(QAbstractAnimation.KeepWhenStopped)
 
 
-		# # ...
-		# def hideButtons(self):
-		# 	self.teaOneButton.hide()
-		# 	self.teaTwoButton.hide()
-
 
 	# ...
 	def prepare_infusion(self):
@@ -266,6 +334,7 @@ class Form(QWidget):
 		self.tea_change(self.sender())		# Check if a new type of tea is to be brewed
 		self.increase_infusion_cycle()
 		self.countdownTimerValue = self.teaMap[self.currentTea].infusion_times[self.infusionCycle-1]
+		self.changeValue = 1.0/self.countdownTimerValue
 
 		self.timerLabel.setText(self.display_time())
 		displayText = self.currentTea.text().replace("\n", " ") + " - Cycle " + str(self.infusionCycle)
@@ -312,14 +381,29 @@ class Form(QWidget):
 
 
 	# ...
-	def test_method(self):
-		pass
-
-	# ...
 	def tea_change(self, sender):
 		if not sender == self.currentTea:
 			self.currentTea = sender
 			self.infusionCycle = 0
+
+
+	# ...
+	def tea_menu(self):
+		# Switch bottom stack state depending on whether or not menu is supposed to be shown
+		middleStackIndex = self.middleStack.currentIndex()
+		bottomStackIndex = self.bottomStack.currentIndex()
+		if bottomStackIndex == 0 and middleStackIndex == 0:
+			self.bottomStack.setCurrentIndex(2)
+
+			self.menuButton.setProperty("active", True)
+			self.style().polish(self.menuButton)		# Update the widget so that it's style changes
+
+		# Entered if tea menu was visible
+		elif bottomStackIndex == 2:
+			self.bottomStack.setCurrentIndex(0)
+
+			self.menuButton.setProperty("active", False)
+			self.style().polish(self.menuButton)		# Update the widget so that it's style changes
 
 
 	# ...
@@ -348,28 +432,26 @@ class Form(QWidget):
 
 			output_string = self.display_time()
 
-			self.adaptBackgroundColor()
-
 			self.timerLabel.setText(output_string)
 			self.countdownTimerValue -= 1
+
+			self.adapt_background_color()
 		else:
 			self.finish()
 
-	# This function is used to compute the new background color value each second
-	def adaptBackgroundColor(self):
-		changeValue = 1.0/(self.teaMap[self.currentTea].infusion_times[self.infusionCycle-1])		# Actually not necessary to calculate it here every time... could go to constructor
 
-		newRed = self.realCurrentBackgroundColor[0] - (self.REDCHANNELDIFF * changeValue)
-		newGreen = self.realCurrentBackgroundColor[1] - (self.GREENCHANNELDIFF * changeValue)
-		newBlue = self.realCurrentBackgroundColor[2] - (self.BLUECHANNELDIFF * changeValue)
+	# This function is used to compute the new background color value each second
+	def adapt_background_color(self):
+		newRed = self.realCurrentBackgroundColor[0] - (self.REDCHANNELDIFF * self.changeValue)
+		newGreen = self.realCurrentBackgroundColor[1] - (self.GREENCHANNELDIFF * self.changeValue)
+		newBlue = self.realCurrentBackgroundColor[2] - (self.BLUECHANNELDIFF * self.changeValue)
 
 		self.realCurrentBackgroundColor = [newRed, newGreen, newBlue, 255]
 		Form.currentBackgroundColor = QColor(newRed, newGreen, newBlue, 255)
 
-		# print(self.realCurrentBackgroundColor)
-		# print(Form.currentBackgroundColor.getRgb())
 		self.mainPalette.setColor(QPalette.Background,Form.currentBackgroundColor)
 		self.setPalette(self.mainPalette)
+
 
 
 ## ===============================================================

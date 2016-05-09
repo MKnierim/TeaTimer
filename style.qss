@@ -3,6 +3,10 @@ QWidget {
 	font-weight: 100;
 }
 
+QWidget#teaOneMenu, QWidget#teaTwoMenu {
+	background-color: #C3D766;
+}
+
 Form {
 	/*background-color: #F5FFCE;*/
 	margin: 0px;
@@ -85,4 +89,32 @@ QPushButton#menuButton:hover {
 
 QPushButton#exitButton:hover {
 	background-image: url(resources/imgs/exitIconHover.png);
+}
+
+QPushButton#minButton:pressed {
+	background-image: url(resources/imgs/minIconPressed.png);
+}
+
+QPushButton#menuButton:pressed {
+	background-image: url(resources/imgs/menuIconPressed.png);
+}
+
+QPushButton#exitButton:pressed {
+	background-image: url(resources/imgs/exitIconPressed.png);
+}
+
+QPushButton#menuButton[active="true"] {
+	background-image: url(resources/imgs/menuIconPressed.png);
+}
+
+QLineEdit, QSpinBox {
+	background-color: #C3D766;
+	color: #F5FFCE;
+	font-size: 24pt;
+	/*border: 0px;*/
+	padding: 4px;
+}
+
+QLineEdit:hover, QSpinBox:hover {
+	color: #617610;
 }

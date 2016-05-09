@@ -31,17 +31,13 @@ Dependencies
 Course of Action
 --------------------------------------------------------------
 **Next steps**
-	- See if I can make the color change over time into nicer code
-	+ Also figure out how to apply color change without disrupting the whole qss
-		* Possible but probably to complicate: rewrite style.qss and reload it every second
-	+ Also figure out a way to adapt fader transitions to changing background color
 	- Make transitions between states smoother (e.g. fade buttons in&out)
 		+ I might also use the same transitions to animate the clock (pulsing) before the countdown starts (here setLoopCount(nr of loops) should help)
+	- Make sure that user input for infusion times is user friendly - they should not have to compute the number of seconds but rather use an intuitive input format (like minutes & seconds). I think it would be fine to exclude handlers for hours here...
 
 
 **Key Functionality**
 	- Functionality for user to change tea (not only in data but in front-end)
-	- Functionality to store teas (in order to switch them out easily later)
 
 
 **Appearance**
