@@ -62,7 +62,6 @@ QPushButton#teaTwoButton {
 }
 
 QPushButton#minButton, QPushButton#menuButton, QPushButton#exitButton {
-	/*background-color: #F5FFCE;*/
 	width: 24px;
 	height: 24px;
 }
