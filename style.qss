@@ -15,6 +15,7 @@ Form {
 
 QLabel {
 	color: #617610;
+	font-size: 16pt;
 }
 
 QLabel#timerLabel {
@@ -23,7 +24,7 @@ QLabel#timerLabel {
 }
 
 QLabel#infoLabel {
-	font-size: 36pt;
+	font-size: 32pt;
 	padding-bottom: 50px;
 }
 
@@ -41,7 +42,7 @@ QPushButton#teaOneButton, QPushButton#teaTwoButton, QPushButton#resetButton {
 	background-color: #617610;
 	color: #F5FFCE;
 	height: 140px;
-	font-size: 36pt;
+	font-size: 32pt;
 }
 
 QPushButton#teaOneButton:hover, QPushButton#teaTwoButton:hover, QPushButton#resetButton:hover {
@@ -51,14 +52,6 @@ QPushButton#teaOneButton:hover, QPushButton#teaTwoButton:hover, QPushButton#rese
 QPushButton#teaOneButton:pressed, QPushButton#teaTwoButton:pressed, QPushButton#resetButton:pressed {
 	background-color: #384509;
 	color: #FFFFFF;
-}
-
-QPushButton#teaOneButton {
-	margin-right: 2px;
-}
-
-QPushButton#teaTwoButton {
-	margin-left: 2px;
 }
 
 QPushButton#minButton, QPushButton#menuButton, QPushButton#exitButton {
@@ -106,14 +99,52 @@ QPushButton#menuButton[active="true"] {
 	background-image: url(resources/imgs/menuIconPressed.png);
 }
 
-QLineEdit, QSpinBox {
+QLineEdit, QTimeEdit {
 	background-color: #C3D766;
 	color: #F5FFCE;
-	font-size: 24pt;
-	/*border: 0px;*/
-	padding: 4px;
+	font-size: 16pt;
+	font-style: italic;
+	border: none;
+	margin: 0px;
+	text-align: center;
+	selection-color: #F5FFCE;
+	selection-background-color: #617610;
 }
 
-QLineEdit:hover, QSpinBox:hover {
+QLineEdit:hover, QTimeEdit:hover {
 	color: #617610;
+}
+
+QTimeEdit {
+	max-width: 60px;
+	margin: 0 4px 0 4px;
+}
+
+QTimeEdit:up-button, QTimeEdit:down-button {
+	width: 6px;
+	height: 10px;
+}
+
+QTimeEdit:up-button {
+	background-image: url(resources/imgs/up-arrow.png);
+}
+
+QTimeEdit:down-button {
+	background-image: url(resources/imgs/down-arrow.png);
+}
+
+QTimeEdit:up-button:hover {
+	background-image: url(resources/imgs/up-arrow-hover.png);
+}
+
+QTimeEdit:down-button:hover {
+	background-image: url(resources/imgs/down-arrow-hover.png);
+}
+
+QTimeEdit:up-button:pressed {
+	background-image: url(resources/imgs/up-arrow-pressed.png);
+}
+
+QTimeEdit:down-button:pressed {
+	background-image: url(resources/imgs/down-arrow-pressed.png);
 }

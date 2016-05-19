@@ -10,11 +10,20 @@ __author__ = "Michael T. Knierim"
 ## ===============================================================
 
 import time
-import data
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+
+
+## DATA DEFINITIONS
+## ===============================================================
+
+## Tea is Tea(String, Tupel)
+class Tea(object):
+    def __init__(self, name, infusion_times):
+        self.name = name
+        self.infusion_times = infusion_times
 
 
 ## CLASSES
@@ -23,8 +32,11 @@ from PyQt5.QtGui import *
 # Customized QLabel with built-in transparency effect
 class ExtendedLabel(QLabel):
 
-    def __init__(self, text=""):
+    def __init__(self, text="", objectName=""):
         super().__init__(text)
+
+        # Simplify object naming on instantiation
+        self.setObjectName(objectName)
 
         # Add an opacity property to every button instance - makes it animatable later
         self.fadeEffect = QGraphicsOpacityEffect(self)
@@ -38,8 +50,11 @@ class ExtendedLabel(QLabel):
 # Customized QPushButton that does not allow to move main window while mouse is moved on top of the button
 class ExtendedButton(QPushButton):
 
-    def __init__(self, text=""):
+    def __init__(self, text="", objectName=""):
         super().__init__(text)
+
+        # Simplify object naming on instantiation
+        self.setObjectName(objectName)
 
     # This event function is overloaded in order to avoid the widget from delegating the event up to the parent.
     # This way, the pre-existing functionality is skipped, i.e. the window can no longer be moved while hovering over a button.
@@ -48,6 +63,30 @@ class ExtendedButton(QPushButton):
     # set QMouseEvent.ignore()..
     def mouseMoveEvent(self, QMouseEvent):
         pass
+
+
+# Customized QLineEdit to pre-define appearance and functionality for several instances later
+class ExtendedLineEdit(QLineEdit):
+
+    def __init__(self, text=""):
+        super().__init__(text)
+
+        self.setAlignment(Qt.AlignCenter)   # Center content vertically and horizontally
+        self.setAttribute(Qt.WA_MacShowFocusRect, False)    # Remove blue focus rectangle
+        self.setMaxLength(20)
+
+
+# Customized QTimeEdit to pre-define appearance and functionality for several instances later
+class ExtendedTimeEdit(QTimeEdit):
+
+    def __init__(self, time=0):
+        super().__init__()
+
+        self.setDisplayFormat("mm:ss")
+        self.setAlignment(Qt.AlignCenter)
+        self.setAttribute(Qt.WA_MacShowFocusRect, False)    # Remove blue focus rectangle
+        self.setWrapping(True)
+        self.setTime(QTime(0, time/60, time%60, 0))
 
 
 # Customized QStackedWidget that allows transparency animations in stack changes
@@ -115,6 +154,12 @@ class Form(QWidget):
         self.currentTea = None              # Keep track of current chosen tea (Object)
         self.countdownTimerValue = 0        # Keep track of remaining seconds in timer (Integer) - TODO Could it not also work to set a continous timer?
 
+        self.teas = [
+            Tea("Dummy Tea", [0,0,0]),
+            Tea("Premium Sencha", [3,15,60]),
+            Tea("Premium Bancha", [120,180,240])
+        ]
+
         # TODO Make this simpler and apply naming conventions
         self.REDCHANNELDIFF = Form.STARTCOLOR.red() - Form.ENDCOLOR.red()
         self.GREENCHANNELDIFF = Form.STARTCOLOR.green() - Form.ENDCOLOR.green()
@@ -126,75 +171,50 @@ class Form(QWidget):
 
         ### UI elements
         ### -------------------------------------------------------------------
-        self.timerLabel = ExtendedLabel("00:00")
-        self.timerLabel.setObjectName("timerLabel")
-
-        self.infoLabel = ExtendedLabel("Select your tea")
-        self.infoLabel.setObjectName("infoLabel")
+        self.timerLabel = ExtendedLabel("00:00", "timerLabel")
+        self.infoLabel = ExtendedLabel("Select your tea", "infoLabel")
 
         # Load tea leaves image that are to be shown before and after infusion
-        self.leavesLabel = ExtendedLabel()
-        self.leavesLabel.setObjectName("leavesLabel")
+        self.leavesLabel = ExtendedLabel("", "leavesLabel")
         self.leavesLabel.setPixmap(QPixmap('resources/imgs/leaves.png'))
 
         # Instantiate buttons on the bottom of the app
-        self.teaOneButton = ExtendedButton(data.TEAONE.name)
-        self.teaOneButton.setObjectName("teaOneButton")
+        self.teaOneButton = ExtendedButton(self.teas[1].name, "teaOneButton")
         self.teaOneButton.clicked.connect(self.prepareInfusion)
 
-        self.teaTwoButton = ExtendedButton(data.TEATWO.name)
-        self.teaTwoButton.setObjectName("teaTwoButton")
+        self.teaTwoButton = ExtendedButton(self.teas[2].name, "teaTwoButton")
         self.teaTwoButton.clicked.connect(self.prepareInfusion)
 
-        self.resetButton = ExtendedButton("Reset")
-        self.resetButton.setObjectName("resetButton")
-        self.resetButton.hide()
+        self.resetButton = ExtendedButton("Reset", "resetButton")
         self.resetButton.clicked.connect(self.reset)
 
         # Instantiate buttons on the top of the app
-        self.minButton = ExtendedButton()
-        self.minButton.setObjectName("minButton")
+        self.minButton = ExtendedButton("", "minButton")
         self.minButton.clicked.connect(self.showMinimized)
 
-        self.menuButton = ExtendedButton()
-        self.menuButton.setObjectName("menuButton")
+        self.menuButton = ExtendedButton("", "menuButton")
         self.menuButton.clicked.connect(self.teaMenu)
 
-        self.exitButton = ExtendedButton()
-        self.exitButton.setObjectName("exitButton")
+        self.exitButton = ExtendedButton("", "exitButton")
         self.exitButton.clicked.connect(QCoreApplication.instance().quit)
 
         # Tea change menu widgets
-        # TODO Figure out how to make button groups or something similar here
-        self.teaOneName = QLineEdit(data.TEAONE.name)
-        self.teaOneCycleOne = QSpinBox()
-        self.teaOneCycleOne.setRange(0, 86400)
-        self.teaOneCycleOne.setValue(data.TEAONE.infusion_times[0])
-        self.teaOneCycleTwo = QSpinBox()
-        self.teaOneCycleTwo.setRange(0, 86400)
-        self.teaOneCycleTwo.setValue(data.TEAONE.infusion_times[1])
-        self.teaOneCycleThree = QSpinBox()
-        self.teaOneCycleThree.setRange(0, 86400)
-        self.teaOneCycleThree.setValue(data.TEAONE.infusion_times[2])
-        # self.teaOneName.setObjectName("teaOneName")
-        # self.teaOneCycleOne.setObjectName("teaOneCycleOne")
-        # self.teaOneCycleTwo.setObjectName("teaOneCycleTwo")
-        # self.teaOneCycleThree.setObjectName("teaOneCycleThree")
+        self.teaOneNameLabel = QLabel("Tea name")
+        self.teaOneName = ExtendedLineEdit(self.teas[1].name)
 
-        self.teaTwoName = QLineEdit(data.TEATWO.name)
-        self.teaTwoCycleOne = QSpinBox()
-        self.teaTwoCycleOne.setRange(0, 86400)
-        self.teaTwoCycleOne.setValue(data.TEATWO.infusion_times[0])
-        self.teaTwoCycleTwo = QSpinBox()
-        self.teaTwoCycleTwo.setRange(0, 86400)
-        self.teaTwoCycleTwo.setValue(data.TEATWO.infusion_times[1])
-        self.teaTwoCycleThree = QSpinBox()
-        self.teaTwoCycleThree.setRange(0, 86400)
-        self.teaTwoCycleThree.setValue(data.TEATWO.infusion_times[2])
-        # self.teaTwoName.setObjectName("teaTwoName")
-        # self.teaTwoCycleOne.setObjectName("teaTwoCycleOne")
-        # self.teaTwoCycleTwo.setObjectName("teaTwoCycleTwo")
-        # self.teaTwoCycleThree.setObjectName("teaTwoCycleThree")
+        self.teaOneCycleLabel = QLabel("Cycle times")
+        self.t1CycleOne = ExtendedTimeEdit(self.teas[1].infusion_times[0])
+        self.t1CycleTwo = ExtendedTimeEdit(self.teas[1].infusion_times[1])
+        self.t1CycleThree = ExtendedTimeEdit(self.teas[1].infusion_times[2])
+
+        self.teaTwoNameLabel = QLabel("Tea name")
+        self.teaTwoName = ExtendedLineEdit(self.teas[2].name)
+
+        self.teaTwoCycleLabel = QLabel("Cycle times")
+        self.t2CycleOne = ExtendedTimeEdit(self.teas[2].infusion_times[0])
+        self.t2CycleTwo = ExtendedTimeEdit(self.teas[2].infusion_times[1])
+        self.t2CycleThree = ExtendedTimeEdit(self.teas[2].infusion_times[2])
+
 
         ### ...
         ### -------------------------------------------------------------------
@@ -210,8 +230,8 @@ class Form(QWidget):
 
         # Mapping buttons to tea data
         self.teaMap = {
-            self.teaOneButton : data.TEAONE,
-            self.teaTwoButton : data.TEATWO
+            self.teaOneButton : self.teas[1],
+            self.teaTwoButton : self.teas[2]
         }
 
         ### Layouts
@@ -222,34 +242,51 @@ class Form(QWidget):
         self.topBox.addWidget(self.menuButton)
         self.topBox.addWidget(self.exitButton)
 
-        # Container widget and layout for infusion action buttons on bottom
-        self.teaButtons = QWidget()
+        # Container widget and layout for tea buttons on bottom
         self.teaButtonsBox = QHBoxLayout()
-        self.teaButtonsBox.setSpacing(0)
+        self.teaButtonsBox.setSpacing(4)
         self.teaButtonsBox.setContentsMargins(0, 0, 0, 0)
         self.teaButtonsBox.addWidget(self.teaOneButton)
         self.teaButtonsBox.addWidget(self.teaTwoButton)
+
+        self.teaButtons = QWidget()
         self.teaButtons.setLayout(self.teaButtonsBox)
 
-        # Container widgets and layouts for tea change menus on bottom
+        # Container widgets and layouts for tea menus on bottom
         self.teaOneMenuBox = QGridLayout()
         self.teaOneMenuBox.setSpacing(4)
-        self.teaOneMenuBox.setContentsMargins(4, 0, 4, 0)
-        self.teaOneMenuBox.addWidget(self.teaOneName, 1, 0, 1, -1)
-        self.teaOneMenuBox.addWidget(self.teaOneCycleOne, 2, 0)
-        self.teaOneMenuBox.addWidget(self.teaOneCycleTwo, 2, 1)
-        self.teaOneMenuBox.addWidget(self.teaOneCycleThree, 2, 2)
+        self.teaOneMenuBox.setContentsMargins(16, 0, 16, 0)
+        self.teaOneMenuBox.addItem(QSpacerItem(10, 15, QSizePolicy.Minimum, QSizePolicy.Minimum), 0, 0)
+        self.teaOneMenuBox.addWidget(self.teaOneNameLabel, 1, 0, 1, -1, Qt.AlignHCenter)
+        self.teaOneMenuBox.addWidget(self.teaOneName, 2, 0, 1, -1)
+        self.teaOneMenuBox.addItem(QSpacerItem(10, 15, QSizePolicy.Minimum, QSizePolicy.Minimum), 3, 0)
+        self.teaOneMenuBox.addWidget(self.teaOneCycleLabel, 4, 0, 1, -1, Qt.AlignHCenter)
+        self.teaOneMenuBox.addItem(QSpacerItem(15, 1, QSizePolicy.Minimum, QSizePolicy.Minimum), 5, 0)
+        self.teaOneMenuBox.addWidget(self.t1CycleOne, 5, 1)
+        self.teaOneMenuBox.addWidget(self.t1CycleTwo, 5, 2)
+        self.teaOneMenuBox.addWidget(self.t1CycleThree, 5, 3)
+        self.teaOneMenuBox.addItem(QSpacerItem(15, 1, QSizePolicy.Minimum, QSizePolicy.Minimum), 5, 4)
+        self.teaOneMenuBox.addItem(QSpacerItem(10, 15, QSizePolicy.Minimum, QSizePolicy.Minimum), 6, 0)
+
         self.teaOneMenu = QWidget()
         self.teaOneMenu.setObjectName("teaOneMenu")
         self.teaOneMenu.setLayout(self.teaOneMenuBox)
 
         self.teaTwoMenuBox = QGridLayout()
         self.teaTwoMenuBox.setSpacing(4)
-        self.teaTwoMenuBox.setContentsMargins(4, 0, 4, 0)
-        self.teaTwoMenuBox.addWidget(self.teaTwoName, 1, 0, 1, -1)
-        self.teaTwoMenuBox.addWidget(self.teaTwoCycleOne, 2, 0)
-        self.teaTwoMenuBox.addWidget(self.teaTwoCycleTwo, 2, 1)
-        self.teaTwoMenuBox.addWidget(self.teaTwoCycleThree, 2, 2)
+        self.teaTwoMenuBox.setContentsMargins(16, 0, 16, 0)
+        self.teaTwoMenuBox.addItem(QSpacerItem(10, 15, QSizePolicy.Minimum, QSizePolicy.Minimum), 0, 0)
+        self.teaTwoMenuBox.addWidget(self.teaTwoNameLabel, 1, 0, 1, -1, Qt.AlignHCenter)
+        self.teaTwoMenuBox.addWidget(self.teaTwoName, 2, 0, 1, -1)
+        self.teaTwoMenuBox.addItem(QSpacerItem(10, 15, QSizePolicy.Minimum, QSizePolicy.Minimum), 3, 0)
+        self.teaTwoMenuBox.addWidget(self.teaTwoCycleLabel, 4, 0, 1, -1, Qt.AlignHCenter)
+        self.teaTwoMenuBox.addItem(QSpacerItem(15, 1, QSizePolicy.Minimum, QSizePolicy.Minimum), 5, 0)
+        self.teaTwoMenuBox.addWidget(self.t2CycleOne, 5, 1)
+        self.teaTwoMenuBox.addWidget(self.t2CycleTwo, 5, 2)
+        self.teaTwoMenuBox.addWidget(self.t2CycleThree, 5, 3)
+        self.teaTwoMenuBox.addItem(QSpacerItem(15, 1, QSizePolicy.Minimum, QSizePolicy.Minimum), 5, 4)
+        self.teaTwoMenuBox.addItem(QSpacerItem(10, 15, QSizePolicy.Minimum, QSizePolicy.Minimum), 6, 0)
+
         self.teaTwoMenu = QWidget()
         self.teaTwoMenu.setObjectName("teaTwoMenu")
         self.teaTwoMenu.setLayout(self.teaTwoMenuBox)
@@ -323,7 +360,7 @@ class Form(QWidget):
         self.leavesLabel.Anim.setEndValue(1.0)
         self.leavesLabel.Anim.setLoopCount(-1)
         self.leavesLabel.Anim.start(QAbstractAnimation.KeepWhenStopped)
-        self.leavesLabel.Anim.finished.connect(self.switchToLeaves)
+        self.leavesLabel.Anim.finished.connect(self.switchMiddleToLeaves)
 
     # Animate timer label to "pulse" - before countdown starts
     def timerLabelAnimation(self):
@@ -333,28 +370,30 @@ class Form(QWidget):
         self.timerLabel.Anim.setKeyValueAt(0.5, 0.3)
         self.timerLabel.Anim.setEndValue(1.0)
         self.timerLabel.Anim.setLoopCount(2)
+        self.timerLabel.Anim.stop()     # stop in case it was running
         self.timerLabel.Anim.start(QAbstractAnimation.KeepWhenStopped)
-        self.timerLabel.Anim.finished.connect(self.switchToTimer)
+        self.timerLabel.Anim.finished.connect(self.switchMiddleToTimer)
 
     # Simple method to increase readability for middle stacked widget changes
-    def switchToLeaves(self):
+    def switchMiddleToLeaves(self):
         self.middleStack.setCurrentIndex(0)
 
     # Simple method to increase readability for middle stacked widget changes
-    def switchToTimer(self):
+    def switchMiddleToTimer(self):
         self.middleStack.setCurrentIndex(1)
 
     # Simple method to increase readability for bottom stacked widget changes
-    def switchToInfusion(self):
+    def switchBottomToInfusion(self):
         self.bottomStack.setCurrentIndex(0)
 
     # Simple method to increase readability for bottom stacked widget changes
-    def switchToReset(self):
+    def switchBottomToReset(self):
         self.bottomStack.setCurrentIndex(1)
 
     # Simple method to increase readability for bottom stacked widget changes
-    def switchToTeaMenu(self):
+    def switchBottomToTeaMenu(self):
         self.bottomStack.setCurrentIndex(2)
+        self.teaOneName.setFocus()
 
     ### Program Logic - Before countdown
     ### -------------------------------------------------------------------
@@ -362,8 +401,8 @@ class Form(QWidget):
     def prepareInfusion(self):
         self.prepTimer.start(1400)
 
-        self.switchToTimer()
-        self.teaChange(self.sender())      # Check if a new type of tea is to be brewed
+        self.switchMiddleToTimer()
+        self.teaChange(self.sender())      # Check for new type of tea
         self.increaseInfusionCycle()
         self.countdownTimerValue = self.teaMap[self.currentTea].infusion_times[self.infusionCycle-1]
         self.changeValue = 1.0/self.countdownTimerValue
@@ -391,7 +430,7 @@ class Form(QWidget):
 
     # Start the infusion process (i.e. the countdown)
     def infusion(self):
-        self.switchToReset()
+        self.switchBottomToReset()
 
         self.countdown()
         self.countdownTimer.start(1000)
@@ -438,7 +477,7 @@ class Form(QWidget):
     def finish(self):
         self.countdownTimer.stop()          # Stop the countdown timer
         self.raise_()                       # Bring window to the foreground
-        self.switchToLeaves()
+        self.switchMiddleToLeaves()
         self.infoLabel.setText("Get your tea on!")
         self.leavesLabelAnimation()
 
@@ -455,20 +494,70 @@ class Form(QWidget):
 
         # If infusion in progress
         if self.middleStack.currentIndex() != 0:
-            self.switchToLeaves()
+            self.switchMiddleToLeaves()
         else:
             self.leavesLabel.Anim.setLoopCount(1)     # Return to initial state
 
         # Reset to initial state in any case
         self.infoLabel.setText("No tea selected")
-        self.switchToInfusion()
+        self.switchBottomToInfusion()
 
     ### Program Logic - Additional Features
     ### -------------------------------------------------------------------
     # ...
     def teaMenu(self):
-        pass
+        middleStackIndex = self.middleStack.currentIndex()
+        bottomStackIndex = self.bottomStack.currentIndex()
 
+        # Switch bottom stack state only when initial state is active
+        if bottomStackIndex == 0 and middleStackIndex == 0:
+            self.switchBottomToTeaMenu()
+
+            self.menuButton.setProperty("active", True)
+            self.style().polish(self.menuButton)    # Update for style change
+
+        # Enter if tea menu is visible
+        elif bottomStackIndex == 2:
+            '''
+            # Pseudo-Code for tea changes through input
+            if change
+                (not necessary to run update functions if no changes were made)
+                (here it might come in handy that QLineEdit objects have a "modified" property)
+                update data
+                    if not valid input
+                        (here masks and validators can be set for the QLineEdit features)
+                        error prompt
+                    else
+                        update values in data structure (every value)
+                        update button captions?
+
+            '''
+
+            # Get all the values from the input fields
+            # params = dict(teaOneName = self.teaOneName.text(),
+            #               t1CycleOneMin = int(self.t1CycleOneMin.text()))
+            self.teas[1].name = self.teaOneName.text()
+            self.teas[1].infusion_times[0] = self.convertToSeconds(self.t1CycleOne.time())
+            self.teas[1].infusion_times[1] = self.convertToSeconds(self.t1CycleTwo.time())
+            self.teas[1].infusion_times[2] = self.convertToSeconds(self.t1CycleThree.time())
+
+            self.teas[2].name = self.teaTwoName.text()
+            self.teas[2].infusion_times[0] = self.convertToSeconds(self.t2CycleOne.time())
+            self.teas[2].infusion_times[1] = self.convertToSeconds(self.t2CycleTwo.time())
+            self.teas[2].infusion_times[2] = self.convertToSeconds(self.t2CycleThree.time())
+
+            self.teaOneButton.setText(self.teas[1].name)
+            self.teaTwoButton.setText(self.teas[2].name)
+
+            self.switchBottomToInfusion()
+
+            self.menuButton.setProperty("active", False)
+            self.style().polish(self.menuButton)    # Update for style change
+
+    # Converts QTime data into sum of seconds (integer)
+    def convertToSeconds(self, time):
+        seconds = time.minute()*60 + time.second()
+        return seconds
 
 ## MAIN LOOP
 ## ===============================================================

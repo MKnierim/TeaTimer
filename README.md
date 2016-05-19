@@ -31,11 +31,11 @@ Dependencies
 Course of Action
 --------------------------------------------------------------
 **Next steps**
-	- Make sure that user input for infusion times is user friendly - they should not have to compute the number of seconds but rather use an intuitive input format (like minutes & seconds). I think it would be fine to exclude handlers for hours here...
-
-
-**Key Functionality**
-	- Functionality for user to change tea (not only in data but in front-end)
+	- Figure out how to integrate user input into program logic well (in teaMenu()) - See the book chapter on smart live modeless dialogs
+	- Figure out how to store user inputs for future program uses. Right now I can think of several possibilities:
+		+ Store in separate file (text file)
+		+ Update code file (write into it)
+		+ Serialize instance (use pickle module)
 
 
 **Deployment**
