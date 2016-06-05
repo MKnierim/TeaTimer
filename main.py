@@ -9,7 +9,7 @@ __author__ = "Michael T. Knierim"
 ## IMPORTS
 ## ===============================================================
 
-import time
+import time, textwrap, pickle
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -141,6 +141,11 @@ class Form(QWidget):
     WINDOW_HEIGHT = 435
     STARTCOLOR = QColor(245, 255, 206, 255)
     ENDCOLOR = QColor(201, 246, 33, 255)
+    DEFAULT_TEAS = [Tea("Dummy Tea", [0,0,0]),
+                    Tea("Premium\nSencha", [3,15,60]),
+                    Tea("Premium\nBancha", [120,180,240])]
+
+    # TODO: Figure out if this should be a global variable...
     currentBackgroundColor = STARTCOLOR
 
     def __init__(self, parent=None):
@@ -154,11 +159,13 @@ class Form(QWidget):
         self.currentTea = None              # Keep track of current chosen tea (Object)
         self.countdownTimerValue = 0        # Keep track of remaining seconds in timer (Integer) - TODO Could it not also work to set a continous timer?
 
-        self.teas = [
-            Tea("Dummy Tea", [0,0,0]),
-            Tea("Premium Sencha", [3,15,60]),
-            Tea("Premium Bancha", [120,180,240])
-        ]
+        # Load tea data (by deserializing or defaulting)
+        # TODO Figure out if this is the right place to deserialize - Maybe I should also write a separate method for this
+        try:
+            with open("data.pickle", "rb") as dataFile:
+                self.teas = pickle.load(dataFile)
+        except FileNotFoundError:
+            self.teas = Form.DEFAULT_TEAS
 
         # TODO Make this simpler and apply naming conventions
         self.REDCHANNELDIFF = Form.STARTCOLOR.red() - Form.ENDCOLOR.red()
@@ -546,9 +553,15 @@ class Form(QWidget):
             self.teas[2].infusion_times[1] = self.convertToSeconds(self.t2CycleTwo.time())
             self.teas[2].infusion_times[2] = self.convertToSeconds(self.t2CycleThree.time())
 
-            self.teaOneButton.setText(self.teas[1].name)
-            self.teaTwoButton.setText(self.teas[2].name)
+            # Set new values
+            self.teaOneButton.setText(self.convertToLines(self.teas[1].name))
+            self.teaTwoButton.setText(self.convertToLines(self.teas[2].name))
 
+            # Serialize updated tea objects
+            with open("data.pickle", "wb") as dataFile:
+                pickle.dump(self.teas, dataFile)
+
+            # Switch back state
             self.switchBottomToInfusion()
 
             self.menuButton.setProperty("active", False)
@@ -558,6 +571,12 @@ class Form(QWidget):
     def convertToSeconds(self, time):
         seconds = time.minute()*60 + time.second()
         return seconds
+
+    # Split tea name text to multiple lines if it is too long
+    def convertToLines(self, oldTeaName):
+        newTeaName = "\n".join(textwrap.wrap(oldTeaName, 12))
+        return newTeaName
+
 
 ## MAIN LOOP
 ## ===============================================================

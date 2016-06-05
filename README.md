@@ -32,10 +32,6 @@ Course of Action
 --------------------------------------------------------------
 **Next steps**
 	- Figure out how to integrate user input into program logic well (in teaMenu()) - See the book chapter on smart live modeless dialogs
-	- Figure out how to store user inputs for future program uses. Right now I can think of several possibilities:
-		+ Store in separate file (text file)
-		+ Update code file (write into it)
-		+ Serialize instance (use pickle module)
 
 
 **Deployment**
@@ -43,5 +39,6 @@ Course of Action
     	+ Currently this seems problematic using PyInstaller (stackoverflow post has been initiated)
     	+ If this does not get solved, consider switching to cx_Freeze
     	+ I could try PyInstaller again now that I have reinstalled Python and PyQt with Homebrew...
+    - Check out all my TODO items
 	- Finish documentation (Comments & Readme)
 	- Deploy on GitHub
