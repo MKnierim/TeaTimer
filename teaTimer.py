@@ -1,33 +1,49 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-## A delightful tea timer for the brewery of excellent tea
+"""
+teaTimer.py: A delightful tea timer for the brewery of excellent tea.
+
+The timer offers the possibility to store to types of tea with up to three infusion times (one per
+cycle). A front-end menu is provided for the user to change the stored teas and infusion times.
+"""
 
 __author__ = "Michael T. Knierim"
+__email__ = "contact@michaelknierim.info"
+__license__ = "MIT"
 
 
-## IMPORTS
-## ===============================================================
+"""
+IMPORTS
+===============================================================
+"""
 
-import time, textwrap, pickle
+# Python built-in modules
+import textwrap
+import pickle
 
+# External modules
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
 
-## DATA DEFINITIONS
-## ===============================================================
+"""
+DATA DEFINITIONS
+===============================================================
+"""
 
-## Tea is Tea(String, Tupel)
+## Tea is Tea(String, List)
 class Tea(object):
     def __init__(self, name, infusion_times):
         self.name = name
         self.infusion_times = infusion_times
 
 
-## CLASSES
-## ===============================================================
+"""
+CLASSES
+===============================================================
+"""
 
 # Customized QLabel with built-in transparency effect
 class ExtendedLabel(QLabel):
@@ -47,7 +63,7 @@ class ExtendedLabel(QLabel):
         self.Anim = QPropertyAnimation(self.fadeEffect, b"opacity")
 
 
-# Customized QPushButton that does not allow to move main window while mouse is moved on top of the button
+# Custom QPushButton that doesn't allow to move main window while mouse is on top of the button
 class ExtendedButton(QPushButton):
 
     def __init__(self, text="", objectName=""):
@@ -56,11 +72,9 @@ class ExtendedButton(QPushButton):
         # Simplify object naming on instantiation
         self.setObjectName(objectName)
 
-    # This event function is overloaded in order to avoid the widget from delegating the event up to the parent.
-    # This way, the pre-existing functionality is skipped, i.e. the window can no longer be moved while hovering over a button.
-    #
-    # Actually, it might also be, that there is no pre-existing functionality which might be why it didn't help to
-    # set QMouseEvent.ignore()..
+    # This event function is overloaded (or created) in order to avoid the widget from delegating 
+    # the event up to the parent.This way, the pre-existing functionality is skipped, i.e. 
+    # the window can no longer be moved while hovering over a button.
     def mouseMoveEvent(self, QMouseEvent):
         pass
 
@@ -135,17 +149,16 @@ class FaderWidget(QWidget):
 # Main widget
 class Form(QWidget):
 
-    ### Constants
-    ### -------------------------------------------------------------------
+    # Constants
+    # -------------------------------------------------------------------
     WINDOW_WIDTH = 690
     WINDOW_HEIGHT = 435
     STARTCOLOR = QColor(245, 255, 206, 255)
     ENDCOLOR = QColor(201, 246, 33, 255)
     DEFAULT_TEAS = [Tea("Dummy Tea", [0,0,0]),
-                    Tea("Premium\nSencha", [3,15,60]),
-                    Tea("Premium\nBancha", [120,180,240])]
+                    Tea("Premium\nSencha", [3, 15, 60]),
+                    Tea("Premium\nBancha", [120, 180, 240])]
 
-    # TODO: Figure out if this should be a global variable...
     currentBackgroundColor = STARTCOLOR
 
     def __init__(self, parent=None):
@@ -153,31 +166,42 @@ class Form(QWidget):
         self.initUI()
 
     def initUI(self):
-        ### Process variables
-        ### -------------------------------------------------------------------
-        self.infusionCycle = 0              # Keep track of current infusion cycle (Integer)
-        self.currentTea = None              # Keep track of current chosen tea (Object)
-        self.countdownTimerValue = 0        # Keep track of remaining seconds in timer (Integer) - TODO Could it not also work to set a continous timer?
+        # Process variables
+        # -------------------------------------------------------------------
+        self.infusionCycle = 0              # Track current infusion cycle
+        self.currentTea = None              # Track current Tea object
+        self.countdownTimerValue = 0        # Track remaining seconds in timer
 
         # Load tea data (by deserializing or defaulting)
-        # TODO Figure out if this is the right place to deserialize - Maybe I should also write a separate method for this
         try:
             with open("data.pickle", "rb") as dataFile:
                 self.teas = pickle.load(dataFile)
         except FileNotFoundError:
             self.teas = Form.DEFAULT_TEAS
 
-        # TODO Make this simpler and apply naming conventions
-        self.REDCHANNELDIFF = Form.STARTCOLOR.red() - Form.ENDCOLOR.red()
-        self.GREENCHANNELDIFF = Form.STARTCOLOR.green() - Form.ENDCOLOR.green()
-        self.BLUECHANNELDIFF = Form.STARTCOLOR.blue() - Form.ENDCOLOR.blue()
-        self.realCurrentBackgroundColor = [245.0, 255.0, 206.0, 255]        # Necessary in order to store precise rgb values - I should also check out QRgba64 objects - they might include what I need
+        # TODO: Simplify this
+        self.redChannelDelta = Form.STARTCOLOR.red() - Form.ENDCOLOR.red()
+        self.greenChannelDelta = Form.STARTCOLOR.green() - Form.ENDCOLOR.green()
+        self.blueChannelDelta = Form.STARTCOLOR.blue() - Form.ENDCOLOR.blue()
+
+        # Necessary in order to store precise rgb values - Could also check out QRgba64 objects
+        self.realCurrentBackgroundColor = [245.0, 255.0, 206.0, 255]
         self.mainPalette = QPalette()
         self.mainPalette.setColor(QPalette.Background,Form.currentBackgroundColor)
         self.changeValue = 1.0
 
-        ### UI elements
-        ### -------------------------------------------------------------------
+        # Add continous timer for infusion countdown
+        self.countdownTimer = QTimer(self)
+        self.countdownTimer.timeout.connect(self.countdown)
+
+        # Add single-shot timer for infusion cycle collection (preparation of infusion)
+        # TODO Check if I really need this timer here in the code
+        self.prepTimer = QTimer(self)
+        self.prepTimer.setSingleShot(True)
+        self.prepTimer.timeout.connect(self.infusion)
+
+        # UI elements
+        # -------------------------------------------------------------------
         self.timerLabel = ExtendedLabel("00:00", "timerLabel")
         self.infoLabel = ExtendedLabel("Select your tea", "infoLabel")
 
@@ -222,27 +246,14 @@ class Form(QWidget):
         self.t2CycleTwo = ExtendedTimeEdit(self.teas[2].infusion_times[1])
         self.t2CycleThree = ExtendedTimeEdit(self.teas[2].infusion_times[2])
 
-
-        ### ...
-        ### -------------------------------------------------------------------
-        # Add continous timer for infusion countdown
-        self.countdownTimer = QTimer(self)
-        self.countdownTimer.timeout.connect(self.countdown)
-
-        # Add single-shot timer for infusion cycle collection (preparation of infusion)
-        # TODO Check if I really need this timer here in the code
-        self.prepTimer = QTimer(self)
-        self.prepTimer.setSingleShot(True)
-        self.prepTimer.timeout.connect(self.infusion)
-
         # Mapping buttons to tea data
         self.teaMap = {
             self.teaOneButton : self.teas[1],
             self.teaTwoButton : self.teas[2]
         }
 
-        ### Layouts
-        ### -------------------------------------------------------------------
+        # Layouts
+        # -------------------------------------------------------------------
         # Container layout for title bar buttons
         self.topBox = QHBoxLayout()
         self.topBox.addWidget(self.minButton)
@@ -332,8 +343,8 @@ class Form(QWidget):
         self.setStyleSheet(open("style.qss", "r").read())
         self.resize(Form.WINDOW_WIDTH, Form.WINDOW_HEIGHT)
 
-    ### Window Manipulation
-    ### -------------------------------------------------------------------
+    # Window Manipulation
+    # -------------------------------------------------------------------
     # Arranging window in center of the screen (on which the mouse resides) by overloading showEvent method
     def showEvent(self, QShowEvent):
         frameGeom = self.frameGeometry()
@@ -356,8 +367,8 @@ class Form(QWidget):
     def mouseReleaseEvent(self, QMouseEvent):
         self.setCursor(QCursor(Qt.ArrowCursor))
 
-    ### Animations
-    ### -------------------------------------------------------------------
+    # Animations
+    # -------------------------------------------------------------------
     # Animate leaf label to "pulse" - after countdown is finished
     def leavesLabelAnimation(self):
         self.leavesLabel.Anim.setDuration(2400)
@@ -402,38 +413,64 @@ class Form(QWidget):
         self.bottomStack.setCurrentIndex(2)
         self.teaOneName.setFocus()
 
-    ### Program Logic - Before countdown
-    ### -------------------------------------------------------------------
-    # ...
+    # Program Logic - Before countdown
+    # -------------------------------------------------------------------
+    # Pre-infusion stage where time is allowed to pass for another button click specifying a
+    # different infusion cycle. After time has passed, this function proceeds to call the
+    # infusion stage.
     def prepareInfusion(self):
+        # TODO: Here I need an early check and set for the infusion cycle.
+        # In case there are no durations set for all 3 cycles of a tea,
+        # there should be no advancement to the next stage
+
+        self.setActiveTea(self.sender())
+        self.setInfusionCycle()
+
         self.prepTimer.start(1400)
 
-        self.switchMiddleToTimer()
-        self.teaChange(self.sender())      # Check for new type of tea
-        self.increaseInfusionCycle()
-        self.countdownTimerValue = self.teaMap[self.currentTea].infusion_times[self.infusionCycle-1]
+        self.countdownTimerValue = self.currentTea.infusion_times[self.infusionCycle-1]
         self.changeValue = 1.0/self.countdownTimerValue
 
+        # Adjust GUI items
         self.timerLabel.setText(self.displayTime())
-        displayText = self.currentTea.text().replace("\n", " ") + " - Cycle " + str(self.infusionCycle)
-        self.infoLabel.setText(displayText)
-
+        self.infoLabel.setText(self.currentTea.name.replace("\n", " ") + " - Cycle " + str(self.infusionCycle))
+        self.switchMiddleToTimer()
         self.timerLabelAnimation()
 
-    # ...
-    def teaChange(self, sender):
-        if not sender == self.currentTea:
-            self.currentTea = sender
+    # Change which tea is currently set as active.
+    def setActiveTea(self, sender):
+        sentTea = self.teaMap[sender]   # Return Tea object mapped to sender button
+
+        # Check if tea has changed and eventually reset cycle count
+        if not sentTea == self.currentTea:
+            self.currentTea = sentTea
             self.infusionCycle = 0
 
-    # ...
-    def increaseInfusionCycle(self):
+    # Update the current infusion cycle to be executed.
+    def setInfusionCycle(self):
+
         if self.infusionCycle < 3:
             self.infusionCycle += 1
 
-        # Reset the infusion cycle if the button is clicked a fourth time
-        else:
+        else:   # Reset the cycle if the button is clicked a fourth time
             self.infusionCycle = 1
+
+        # TODO: Figure out how to check here if next infusion cycle duration is 0
+        """
+            Use itertools module to cycle through infusion_times
+            from itertools import cycle
+
+            # In Tea object instantiate infusionCycle = cycle(infusion_times)
+
+            # Go through cycle until you find next valid infusion time (i.e. >0); Then set the current cycle to this
+            while True:
+                self.infusionCycle = cycle.next()
+                if self.infusionCycle > 0:
+                    break
+
+            # TODO: This might still be simplified a bit (e.g. specifying the while condition so that I don't need the if check later)
+            # TODO: Also, the cycle variables seem rather redundant here. I should reduce this.
+        """
 
     # Start the infusion process (i.e. the countdown)
     def infusion(self):
@@ -442,9 +479,9 @@ class Form(QWidget):
         self.countdown()
         self.countdownTimer.start(1000)
 
-    ### Program Logic - During countdown
-    ### -------------------------------------------------------------------
-    # ...
+    # Program Logic - During countdown
+    # -------------------------------------------------------------------
+    # Update the countdown display in the main window during infusion.
     def countdown(self):
         if self.countdownTimerValue != 0:
 
@@ -457,7 +494,7 @@ class Form(QWidget):
         else:
             self.finish()
 
-    # ...
+    # Format the countdown value to a minute:second string for display.
     def displayTime(self):
         minutes = self.countdownTimerValue // 60
         seconds = self.countdownTimerValue % 60
@@ -468,9 +505,9 @@ class Form(QWidget):
 
     # Compute the new background color value each second
     def adaptBackgroundColor(self):
-        newRed = self.realCurrentBackgroundColor[0] - (self.REDCHANNELDIFF * self.changeValue)
-        newGreen = self.realCurrentBackgroundColor[1] - (self.GREENCHANNELDIFF * self.changeValue)
-        newBlue = self.realCurrentBackgroundColor[2] - (self.BLUECHANNELDIFF * self.changeValue)
+        newRed = self.realCurrentBackgroundColor[0] - (self.redChannelDelta * self.changeValue)
+        newGreen = self.realCurrentBackgroundColor[1] - (self.greenChannelDelta * self.changeValue)
+        newBlue = self.realCurrentBackgroundColor[2] - (self.blueChannelDelta * self.changeValue)
 
         self.realCurrentBackgroundColor = [newRed, newGreen, newBlue, 255]
         Form.currentBackgroundColor = QColor(newRed, newGreen, newBlue, 255)
@@ -478,8 +515,8 @@ class Form(QWidget):
         self.mainPalette.setColor(QPalette.Background,Form.currentBackgroundColor)
         self.setPalette(self.mainPalette)
 
-    ### Program Logic - After countdown
-    ### -------------------------------------------------------------------
+    # Program Logic - After countdown
+    # -------------------------------------------------------------------
     # Alert the user when the tea is finished
     def finish(self):
         self.countdownTimer.stop()          # Stop the countdown timer
@@ -509,9 +546,9 @@ class Form(QWidget):
         self.infoLabel.setText("No tea selected")
         self.switchBottomToInfusion()
 
-    ### Program Logic - Additional Features
-    ### -------------------------------------------------------------------
-    # ...
+    # Program Logic - Tea menu
+    # -------------------------------------------------------------------
+    # User interaction with the tea menu where the names and cycle durations can be set.
     def teaMenu(self):
         middleStackIndex = self.middleStack.currentIndex()
         bottomStackIndex = self.bottomStack.currentIndex()
@@ -519,13 +556,39 @@ class Form(QWidget):
         # Switch bottom stack state only when initial state is active
         if bottomStackIndex == 0 and middleStackIndex == 0:
             self.switchBottomToTeaMenu()
-
             self.menuButton.setProperty("active", True)
             self.style().polish(self.menuButton)    # Update for style change
 
         # Enter if tea menu is visible
         elif bottomStackIndex == 2:
-            '''
+
+            # Set new values
+            self.teas[1].name = self.convertToLines(self.teaOneName.text())
+            self.teas[1].infusion_times[0] = self.convertToSeconds(self.t1CycleOne.time())
+            self.teas[1].infusion_times[1] = self.convertToSeconds(self.t1CycleTwo.time())
+            self.teas[1].infusion_times[2] = self.convertToSeconds(self.t1CycleThree.time())
+
+            self.teas[2].name = self.convertToLines(self.teaTwoName.text())
+            self.teas[2].infusion_times[0] = self.convertToSeconds(self.t2CycleOne.time())
+            self.teas[2].infusion_times[1] = self.convertToSeconds(self.t2CycleTwo.time())
+            self.teas[2].infusion_times[2] = self.convertToSeconds(self.t2CycleThree.time())
+
+            # Update tea buttons
+            self.teaOneButton.setText(self.teas[1].name)
+            self.teaTwoButton.setText(self.teas[2].name)
+
+            # Serialize updated tea objects
+            with open("data.pickle", "wb") as dataFile:
+                pickle.dump(self.teas, dataFile)
+
+            # Switch back to initial state
+            self.switchBottomToInfusion()
+            self.menuButton.setProperty("active", False)
+            self.style().polish(self.menuButton)    # Update for style change
+
+            # TODO: Figure out logic for input validation and efficient updating
+
+            """
             # Pseudo-Code for tea changes through input
             if change
                 (not necessary to run update functions if no changes were made)
@@ -537,35 +600,19 @@ class Form(QWidget):
                     else
                         update values in data structure (every value)
                         update button captions?
-
-            '''
+            """
 
             # Get all the values from the input fields
             # params = dict(teaOneName = self.teaOneName.text(),
             #               t1CycleOneMin = int(self.t1CycleOneMin.text()))
-            self.teas[1].name = self.teaOneName.text()
-            self.teas[1].infusion_times[0] = self.convertToSeconds(self.t1CycleOne.time())
-            self.teas[1].infusion_times[1] = self.convertToSeconds(self.t1CycleTwo.time())
-            self.teas[1].infusion_times[2] = self.convertToSeconds(self.t1CycleThree.time())
 
-            self.teas[2].name = self.teaTwoName.text()
-            self.teas[2].infusion_times[0] = self.convertToSeconds(self.t2CycleOne.time())
-            self.teas[2].infusion_times[1] = self.convertToSeconds(self.t2CycleTwo.time())
-            self.teas[2].infusion_times[2] = self.convertToSeconds(self.t2CycleThree.time())
+    # Stub apply user changes to tea data
+    def applyTeaChanges(self):
+        pass
 
-            # Set new values
-            self.teaOneButton.setText(self.convertToLines(self.teas[1].name))
-            self.teaTwoButton.setText(self.convertToLines(self.teas[2].name))
-
-            # Serialize updated tea objects
-            with open("data.pickle", "wb") as dataFile:
-                pickle.dump(self.teas, dataFile)
-
-            # Switch back state
-            self.switchBottomToInfusion()
-
-            self.menuButton.setProperty("active", False)
-            self.style().polish(self.menuButton)    # Update for style change
+    # Stub check if a tea name was adequately specified.
+    def checkTeaName(self, input):
+        pass
 
     # Converts QTime data into sum of seconds (integer)
     def convertToSeconds(self, time):
@@ -578,22 +625,21 @@ class Form(QWidget):
         return newTeaName
 
 
-## MAIN LOOP
-## ===============================================================
+"""
+MAIN LOOP
+===============================================================
+"""
 
 if __name__ == '__main__':
 
     import sys
 
     app = QApplication(sys.argv)
-    QFontDatabase.addApplicationFont('resources/fonts/CaviarDreams.ttf')        # Not sure if this is the right place here
+    QFontDatabase.addApplicationFont('resources/fonts/CaviarDreams.ttf')
 
     screen = Form()
 
-    # Next line removes the title bar. For additional information see:
-    # http://doc.qt.io/qt-5/qt.html#WindowType-enum
-    # http://doc.qt.io/qt-5/qtwidgets-widgets-windowflags-example.html
-    screen.setWindowFlags(Qt.FramelessWindowHint)
+    screen.setWindowFlags(Qt.FramelessWindowHint)       # Removes the title bar
     screen.show()
 
-    sys.exit(app.exec_())       # Event handling loop for the application; The sys.exit() method ensures a clean exit, releasing memory resources
+    sys.exit(app.exec_())       # sys.exit() ensures a clean exit, releasing memory resources

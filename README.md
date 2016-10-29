@@ -1,44 +1,30 @@
-# TeaTimer Application (smarTimer?)
-**Quick Thoughts**
-* ...
+# Tea Timer
+This is a simple timer for the brewery of excellent tea. It allows the specification of up to two sorts of tea and three infusion times each. Users can specify tea names and infusion cycle durations directly in the front end by switching to the hidden menu (button upper right). Different infusion times are selected based on the number of clicks on a button.
+
+**Screenshot**
+![Screenshot Tea Timer](/resources/imgs/screenshot.jpg "screenshot tea timer")
 
 
-
-Features
---------------------------------------------------------------
-* ...
-
-
-
-Running instructions
---------------------------------------------------------------
-Here are some useful tips to help run the application:
-
-### Desktop
-...
-
-### Mobile
-...
-
-
-Dependencies
---------------------------------------------------------------
+## Getting Started
+### Prerequisites
 * Python3
 * Qt5
 * PyQt5
 
+### Running
+To run the timer, simply execute teaTimer.py.
 
-Course of Action
---------------------------------------------------------------
-**Next steps**
-	- Figure out how to integrate user input into program logic well (in teaMenu()) - See the book chapter on smart live modeless dialogs
+## Known Issues
+There are still a few minor issues to be fixed. These include:
+* User Input Validation
+    * Skipping cycles to which the duration 0 is set.
+    * Validate tea name user input so that no empty name is set.
+    * Making sure that not all three tea durations can be set to 0.
+* Platform-dependent GUI
+    * Currently there are slight misalignments of GUI elements on other systems than OS X.
 
+## Authors
+This project was created by [Michael Knierim](https://github.com/MKnierim).
 
-**Deployment**
-	- Figure out how to pack & deploy so that people can use it without having to install PyQt
-    	+ Currently this seems problematic using PyInstaller (stackoverflow post has been initiated)
-    	+ If this does not get solved, consider switching to cx_Freeze
-    	+ I could try PyInstaller again now that I have reinstalled Python and PyQt with Homebrew...
-    - Check out all my TODO items
-	- Finish documentation (Comments & Readme)
-	- Deploy on GitHub
+## Licensing
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
