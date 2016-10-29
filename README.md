@@ -1,7 +1,6 @@
 # Tea Timer
 This is a simple timer for the brewery of excellent tea. It allows the specification of up to two sorts of tea and three infusion times each. Users can specify tea names and infusion cycle durations directly in the front end by switching to the hidden menu (button upper right). Different infusion times are selected based on the number of clicks on a button.
 
-**Screenshot**
 ![Screenshot Tea Timer](/resources/imgs/screenshot.jpg "screenshot tea timer")
 
 
